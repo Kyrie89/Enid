@@ -4,6 +4,7 @@ import { S } from "../styles";
 import { CATEGORY_META, ISSUE_TAGS, BARRIER_TAGS } from "../lib/taxonomy";
 import { FormRow, TagChip } from "./shared";
 import { ScheduleEditor } from "./ScheduleEditor";
+import { LocationsEditor } from "./LocationsEditor";
 
 export function EditForm({
   draft, setDraft, resources, onSave, onCancel,
@@ -75,6 +76,8 @@ export function EditForm({
         <FormRow label="Phone" grow><input style={S.input} value={draft.phone} onChange={set("phone")} placeholder="580-..." /></FormRow>
         <FormRow label="Website" grow><input style={S.input} value={draft.website} onChange={set("website")} placeholder="https://" /></FormRow>
       </div>
+
+      <LocationsEditor draft={draft} setDraft={setDraft} />
 
       <FormRow label="Population served">
         <input style={S.input} value={draft.populations} onChange={set("populations")} placeholder="e.g. adult men, adolescents, corrections-involved" />
