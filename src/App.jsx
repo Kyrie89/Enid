@@ -434,7 +434,7 @@ export default function App() {
       <header style={S.header}>
         <div style={S.headerInner}>
           <div>
-            <div style={S.eyebrow}>{audienceMode === "client" ? (lang === "es" ? "ENID, OK · OBTENER AYUDA" : "ENID, OK · GET HELP") : "ENID, OK · RECOVERY & RESOURCE NETWORK"}</div>
+            <div style={S.eyebrow}>{audienceMode === "client" ? (lang === "es" ? "ENID, OK · OBTENER AYUDA" : "ENID, OK · GET HELP") : "ENID, OK · RESOURCE NETWORK"}</div>
             <h1 style={S.h1}>
               {audienceMode === "client"
                 ? (lang === "es" ? "¿Qué necesitas hoy?" : "What do you need today?")
