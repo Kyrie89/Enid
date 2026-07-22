@@ -92,6 +92,32 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
         {resource.website && <Field icon={Globe} label="Website" value={resource.website.replace(/^https?:\/\//, "")} href={resource.website} external />}
       </div>
 
+      {resource.locations?.length > 0 && (
+        <div style={{ marginTop: 8, marginBottom: 6 }}>
+          <div style={S.infoBlockTitle}><MapPin size={13} /> Other locations</div>
+          {resource.locations.map((l) => {
+            const locDirections = l.address
+              ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(l.address.includes("OK") ? l.address : l.address + ", Enid, OK")}`
+              : null;
+            return (
+              <div key={l.id} style={{ fontSize: 13.5, color: "#3c4146", marginBottom: 6, lineHeight: 1.5 }}>
+                <span style={{ fontWeight: 600 }}>{l.label}</span>
+                {" — "}
+                {locDirections ? (
+                  <a href={locDirections} target="_blank" rel="noreferrer" style={{ color: "inherit" }}>{l.address}</a>
+                ) : (
+                  l.address
+                )}
+                {l.phone && !isClient && (
+                  <> · <a href={`tel:${l.phone.replace(/[^0-9+]/g, "")}`} style={{ color: "inherit" }}>{l.phone}</a></>
+                )}
+                {l.notes && <div style={{ color: "#9aa0a6", fontSize: 12.5 }}>{l.notes}</div>}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {resource.schedule?.length > 0 && (
         <div style={S.meetingBlock}>
           <div style={S.infoBlockTitle}><Clock size={13} /> Weekly schedule</div>
