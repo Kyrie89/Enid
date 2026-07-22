@@ -48,7 +48,7 @@ export default function App() {
   const [editorProfile, setEditorProfile] = useState(null);
   const fileInputRef = useRef(null);
 
-  const isEditor = !!editorProfile;
+  const isEditor = true; // TEMP: auth disabled while populating content — restore !!editorProfile before real launch
   const editorDisplayName = editorProfile?.display_name || "";
 
   const showToast = useCallback((msg) => {
