@@ -19,7 +19,7 @@ import { AuthBar } from "./components/AuthBar";
 
 const emptyDraft = () => ({
   id: uid(), name: "", category: "treatment", secondaryCategories: [], subcategory: "", address: "", phone: "",
-  website: "", populations: "", exclusions: "", insurance: "", notes: "", schedule: [], issues: [], barriers: [],
+  website: "", populations: "", exclusions: "", insurance: "", notes: "", schedule: [], locations: [], issues: [], barriers: [],
   connections: [], verifiedDate: null, status: "active", editedBy: "", editedDate: null,
 });
 
@@ -78,14 +78,20 @@ export default function App() {
     return () => { ignore = true; };
   }, [session]);
 
-  /* ---- resources / schedule / connections ---- */
+  /* ---- resources / schedule / connections / locations ---- */
   const fetchResources = useCallback(async () => {
-    const [{ data: resourcesData, error: rErr }, { data: scheduleData, error: sErr }, { data: connectionsData, error: cErr }] = await Promise.all([
+    const [
+      { data: resourcesData, error: rErr },
+      { data: scheduleData, error: sErr },
+      { data: connectionsData, error: cErr },
+      { data: locationsData, error: lErr },
+    ] = await Promise.all([
       supabase.from("resources").select("*"),
       supabase.from("schedule").select("*"),
       supabase.from("connections").select("*"),
+      supabase.from("locations").select("*"),
     ]);
-    if (rErr || sErr || cErr) {
+    if (rErr || sErr || cErr || lErr) {
       showToast("Couldn't load resources — try refreshing");
       return;
     }
@@ -97,6 +103,7 @@ export default function App() {
       editedDate: r.edited_date,
       schedule: scheduleData.filter((s) => s.resource_id === r.id),
       connections: connectionsData.filter((c) => c.resource_id === r.id).map((c) => c.connected_resource_id),
+      locations: locationsData.filter((l) => l.resource_id === r.id),
     }));
     setResources(merged);
   }, [showToast]);
@@ -143,7 +150,11 @@ export default function App() {
     if (!q) return base.sort((a, b) => a.name.localeCompare(b.name));
 
     const hayOf = (r) =>
-      [r.name, r.subcategory, r.address, r.populations, r.insurance, r.notes, ...(r.issues || []), ...(r.barriers || [])]
+      [
+        r.name, r.subcategory, r.address, r.populations, r.insurance, r.notes,
+        ...(r.issues || []), ...(r.barriers || []),
+        ...(r.locations || []).flatMap((l) => [l.label, l.address]),
+      ]
         .join(" ")
         .toLowerCase();
 
@@ -242,7 +253,7 @@ export default function App() {
       }
     }
     const stamped = { ...editing, editedBy: editorDisplayName || "Unattributed", editedDate: new Date().toISOString().slice(0, 10) };
-    const { schedule, connections, secondaryCategories, verifiedDate, editedBy, editedDate, ...rest } = stamped;
+    const { schedule, connections, locations, secondaryCategories, verifiedDate, editedBy, editedDate, ...rest } = stamped;
 
     const { error: resourceError } = await supabase.from("resources").upsert({
       ...rest,
@@ -264,6 +275,13 @@ export default function App() {
     if (connections?.length) {
       await supabase.from("connections").insert(
         connections.map((cid) => ({ resource_id: stamped.id, connected_resource_id: cid }))
+      );
+    }
+
+    await supabase.from("locations").delete().eq("resource_id", stamped.id);
+    if (locations?.length) {
+      await supabase.from("locations").insert(
+        locations.map((l) => ({ resource_id: stamped.id, label: l.label, address: l.address, phone: l.phone, notes: l.notes }))
       );
     }
 
@@ -311,6 +329,7 @@ export default function App() {
       issues: (r.issues || []).join(" | "),
       barriers: (r.barriers || []).join(" | "),
       schedule: (r.schedule || []).map((s) => `${s.day}@${s.time}@${s.label}@${s.frequency}`).join(" ; "),
+      locations: (r.locations || []).map((l) => `${l.label}@${l.address}@${l.phone}@${l.notes}`).join(" ; "),
       verifiedDate: r.verifiedDate || "",
       status: r.status || "active",
       editedBy: r.editedBy || "",
@@ -356,6 +375,10 @@ export default function App() {
               const [day, time, label, frequency] = chunk.split("@");
               return { day: day || "Monday", time: time || "", label: label || "", frequency: frequency || "Weekly" };
             }),
+            locations: (row.locations || "").split(";").map((s) => s.trim()).filter(Boolean).map((chunk) => {
+              const [label, address, phone, notes] = chunk.split("@");
+              return { label: label || "", address: address || "", phone: phone || "", notes: notes || "" };
+            }),
             // Connections reference internal IDs from the source file that won't match here —
             // left blank intentionally rather than silently pointing at the wrong resource.
             status: "active",
@@ -368,7 +391,7 @@ export default function App() {
           return;
         }
         for (const r of imported) {
-          const { schedule, secondaryCategories, editedBy, editedDate, ...rest } = r;
+          const { schedule, locations, secondaryCategories, editedBy, editedDate, ...rest } = r;
           const { error } = await supabase.from("resources").insert({
             ...rest,
             secondary_categories: secondaryCategories,
@@ -378,6 +401,9 @@ export default function App() {
           if (error) continue;
           if (schedule.length) {
             await supabase.from("schedule").insert(schedule.map((s) => ({ resource_id: r.id, ...s })));
+          }
+          if (locations.length) {
+            await supabase.from("locations").insert(locations.map((l) => ({ resource_id: r.id, ...l })));
           }
         }
         await fetchResources();
