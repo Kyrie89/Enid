@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   MapPin, Phone, Globe, Clock, Users, AlertTriangle, ShieldCheck, Link2,
-  Edit3, Trash2, Copy, Navigation,
+  Edit3, Trash2, Copy, Navigation, X,
 } from "lucide-react";
 import { S } from "../styles";
 import { CATEGORY_META, DAYS, DAY_SHORT } from "../lib/taxonomy";
@@ -9,6 +9,8 @@ import { getVerificationInfo } from "../lib/utils";
 import { Field, InfoBlock, ConnectionRow } from "./shared";
 
 export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJump, audienceMode, showToast, canEdit }) {
+  const [confirmAction, setConfirmAction] = useState(null); // null | "close" | "delete"
+  const confirmCancelRef = useRef(null);
   const meta = CATEGORY_META[resource.category];
   const Icon = meta.icon;
   const isClient = audienceMode === "client";
@@ -16,8 +18,16 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
   const referredBy = resources.filter((r) => r.connections.includes(resource.id) && !resource.connections.includes(r.id));
 
   const directionsUrl = resource.address
-    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(resource.address.includes("OK") ? resource.address : resource.address + ", Enid, OK")}`
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(resource.address)}`
     : null;
+
+  useEffect(() => {
+    if (!confirmAction) return;
+    const onKey = (e) => { if (e.key === "Escape") setConfirmAction(null); };
+    window.addEventListener("keydown", onKey);
+    confirmCancelRef.current?.focus();
+    return () => window.removeEventListener("keydown", onKey);
+  }, [confirmAction]);
 
   const shareText = () => {
     const lines = [resource.name];
@@ -104,7 +114,7 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
           <div style={S.infoBlockTitle}><MapPin size={13} /> Other locations</div>
           {resource.locations.map((l) => {
             const locDirections = l.address
-              ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(l.address.includes("OK") ? l.address : l.address + ", Enid, OK")}`
+              ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(l.address)}`
               : null;
             return (
               <div key={l.id} style={{ fontSize: 13.5, color: "#3c4146", marginBottom: 6, lineHeight: 1.5 }}>
@@ -185,14 +195,41 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
         {!isClient && canEdit && <button style={S.editBtn} onClick={onEdit}><Edit3 size={14} /> Edit</button>}
         <button style={S.shareBtn} onClick={copyShare}><Copy size={14} /> Copy to text a client</button>
         {!isClient && canEdit && resource.status !== "closed" && (
-          <button style={S.closeBtn} onClick={() => window.confirm(`Mark "${resource.name}" as closed? It stays in the list (unless hidden) for reference.`) && onClose()}>
+          <button style={S.closeBtn} onClick={() => setConfirmAction("close")}>
             Mark closed
           </button>
         )}
         {!isClient && canEdit && (
-          <button style={S.deleteBtn} onClick={() => window.confirm(`Permanently delete "${resource.name}"? This can't be undone — consider "Mark closed" instead.`) && onDelete()}><Trash2 size={14} /> Delete</button>
+          <button style={S.deleteBtn} onClick={() => setConfirmAction("delete")}><Trash2 size={14} /> Delete</button>
         )}
       </div>
+
+      {confirmAction && (
+        <div style={S.modalOverlay} onClick={() => setConfirmAction(null)}>
+          <div style={S.modalCard} onClick={(e) => e.stopPropagation()}>
+            <div style={S.formHeader}>
+              <h2 style={{ margin: 0, fontSize: 17 }}>
+                {confirmAction === "delete" ? "Delete this resource?" : "Mark this resource closed?"}
+              </h2>
+              <button style={S.iconBtn} onClick={() => setConfirmAction(null)} aria-label="Cancel"><X size={16} /></button>
+            </div>
+            <div style={{ fontSize: 13.5, color: "#3c4146", fontFamily: "'Helvetica Neue', Arial, sans-serif", lineHeight: 1.5, marginBottom: 18 }}>
+              {confirmAction === "delete"
+                ? `Permanently delete "${resource.name}"? This can't be undone — consider "Mark closed" instead.`
+                : `Mark "${resource.name}" as closed? It stays in the list (unless hidden) for reference.`}
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                style={confirmAction === "delete" ? S.deleteBtn : S.closeBtn}
+                onClick={() => { const action = confirmAction; setConfirmAction(null); if (action === "delete") onDelete(); else onClose(); }}
+              >
+                {confirmAction === "delete" ? "Delete" : "Mark closed"}
+              </button>
+              <button ref={confirmCancelRef} style={S.cancelBtn} onClick={() => setConfirmAction(null)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
