@@ -77,6 +77,22 @@ export function EditForm({
         <FormRow label="Website" grow><input style={S.input} value={draft.website} onChange={set("website")} placeholder="https://" /></FormRow>
       </div>
 
+      <FormRow label="City / town (used for the location filter)">
+        <input style={S.input} value={draft.city || ""} onChange={set("city")} placeholder="e.g. Enid, Kingfisher" />
+      </FormRow>
+
+      <FormRow label="Scope">
+        <label style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13.5, color: "#3c4146", fontFamily: "'Helvetica Neue', Arial, sans-serif", lineHeight: 1.4 }}>
+          <input
+            type="checkbox"
+            style={{ marginTop: 3 }}
+            checked={!!draft.isStatewide}
+            onChange={(e) => setDraft({ ...draft, isStatewide: e.target.checked })}
+          />
+          This is a statewide/national hotline or program, not a specific local address — list it under the Statewide tab instead of by city
+        </label>
+      </FormRow>
+
       <LocationsEditor draft={draft} setDraft={setDraft} />
 
       <FormRow label="Population served">
