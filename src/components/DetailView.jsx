@@ -4,7 +4,7 @@ import {
   Edit3, Trash2, Copy, Navigation, X, Printer,
 } from "lucide-react";
 import { S } from "../styles";
-import { CATEGORY_META, DAYS, DAY_SHORT } from "../lib/taxonomy";
+import { CATEGORY_META, DAYS, DAY_SHORT, CLIENT_TAG_LABELS } from "../lib/taxonomy";
 import { getVerificationInfo } from "../lib/utils";
 import { supabase } from "../supabaseClient";
 import { Field, InfoBlock, ConnectionRow } from "./shared";
@@ -195,25 +195,25 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
         </div>
       )}
 
-      {resource.populations && <InfoBlock icon={Users} title="Population served" text={resource.populations} />}
+      {resource.populations && <InfoBlock icon={Users} title={isClient ? "Who can use this service" : "Population served"} text={resource.populations} />}
       {(resource.ageMin != null || resource.ageMax != null) && (
         <InfoBlock icon={Users} title="Age range served" text={formatAgeRange(resource.ageMin, resource.ageMax)} />
       )}
-      {resource.exclusions && <InfoBlock icon={AlertTriangle} title="Won't work for" text={resource.exclusions} tone="warn" />}
-      {resource.insurance && <InfoBlock icon={ShieldCheck} title="Insurance / cost" text={resource.insurance} />}
+      {resource.exclusions && <InfoBlock icon={AlertTriangle} title={isClient ? "Reasons someone may not qualify" : "Won't work for"} text={resource.exclusions} tone="warn" />}
+      {resource.insurance && <InfoBlock icon={ShieldCheck} title="Cost and insurance" text={resource.insurance} />}
 
       {(resource.issues?.length > 0 || resource.barriers?.length > 0) && (
         <div style={{ marginTop: 14, borderTop: "1px solid #f0eee8", paddingTop: 12 }}>
           {resource.issues?.length > 0 && (
             <div style={{ marginBottom: 8 }}>
               <div style={S.pillGroupLabel}>Addresses</div>
-              <div style={S.tagWrap}>{resource.issues.map((t) => <span key={t} style={S.pillIssue}>{t}</span>)}</div>
+              <div style={S.tagWrap}>{resource.issues.map((t) => <span key={t} style={S.pillIssue}>{isClient ? (CLIENT_TAG_LABELS[t] || t) : t}</span>)}</div>
             </div>
           )}
           {resource.barriers?.length > 0 && (
             <div>
-              <div style={S.pillGroupLabel}>Removes barrier</div>
-              <div style={S.tagWrap}>{resource.barriers.map((t) => <span key={t} style={S.pillBarrier}>{t}</span>)}</div>
+              <div style={S.pillGroupLabel}>{isClient ? "Important access needs" : "Removes barrier"}</div>
+              <div style={S.tagWrap}>{resource.barriers.map((t) => <span key={t} style={S.pillBarrier}>{isClient ? (CLIENT_TAG_LABELS[t] || t) : t}</span>)}</div>
             </div>
           )}
         </div>

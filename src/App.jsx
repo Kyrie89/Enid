@@ -3,11 +3,13 @@ import Papa from "papaparse";
 import {
   Search, Plus, X, Phone, Link2, ChevronRight, SlidersHorizontal, Tag, Filter,
   Clock, Share2, BarChart3, Printer, Download, Upload, UserCog, ChevronLeft, Users,
+  MoreHorizontal,
 } from "lucide-react";
 
 import { supabase } from "./supabaseClient";
 import { CATEGORY_META, ISSUE_TAG_GROUPS, BARRIER_TAGS, DAYS, DAY_SHORT } from "./lib/taxonomy";
-import { uid, findLikelyDuplicate, timeToMinutes, fuzzyScore } from "./lib/utils";
+import { uid, findLikelyDuplicate, timeToMinutes, fuzzyScore, expandSearchQuery } from "./lib/utils";
+import { SEARCH_SYNONYMS } from "./lib/searchSynonyms";
 import { S } from "./styles";
 
 import { CatChip, TagChip } from "./components/shared";
@@ -34,6 +36,21 @@ const PRINT_FIELD_OPTIONS = [
   { key: "notes", label: "Notes" },
 ];
 
+const CLIENT_QUICK_NEEDS = [
+  { label: "Somewhere safe tonight", issues: ["Crisis / emergency"] },
+  { label: "Food today", issues: ["Food"] },
+  { label: "Rent or utility help", issues: ["Housing / rent", "Utilities"] },
+  { label: "Medical care or medication", issues: ["Medical care"] },
+  { label: "Mental-health help", issues: ["Mental health"] },
+  { label: "Substance-use treatment", issues: ["Substance use"] },
+  { label: "A sober place to live", issues: ["Sober living / recovery housing"] },
+  { label: "Work, benefits, or ID", issues: ["Employment", "Government benefits", "ID & documents"] },
+  { label: "Legal help", issues: ["Legal / court"] },
+  { label: "Transportation", issues: ["Transportation"] },
+  { label: "Help for my child or family", issues: ["Childcare", "Youth activities"] },
+  { label: "Someone to talk to", issues: ["Grief / loss support", "Mental health"] },
+];
+
 /* ---------------- app ---------------- */
 export default function App() {
   const [resources, setResources] = useState(null);
@@ -55,6 +72,8 @@ export default function App() {
   const [scopeFilter, setScopeFilter] = useState("local"); // "local" | "regional" | "all"
   const lang = "en"; // TEMP: language toggle removed since resource content itself doesn't translate
   const [showInsights, setShowInsights] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const moreMenuRef = useRef(null);
   const [showPrintOptions, setShowPrintOptions] = useState(false);
   const [printSingleMode, setPrintSingleMode] = useState(false);
   const [printFields, setPrintFields] = useState({ phone: true, address: true, website: false, insurance: false, populations: false, issues: false, barriers: false, notes: false });
@@ -170,6 +189,15 @@ export default function App() {
     }
   }, [selectedId, editing?.id]);
 
+  useEffect(() => {
+    if (!showMoreMenu) return;
+    const onClick = (e) => { if (moreMenuRef.current && !moreMenuRef.current.contains(e.target)) setShowMoreMenu(false); };
+    const onKey = (e) => { if (e.key === "Escape") setShowMoreMenu(false); };
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onClick); document.removeEventListener("keydown", onKey); };
+  }, [showMoreMenu]);
+
   const cities = useMemo(() => {
     if (!resources) return [];
     const set = new Set(resources.filter((r) => !r.isStatewide && !r.isCountywide && r.city).map((r) => r.city));
@@ -193,8 +221,8 @@ export default function App() {
     return true;
   }, [ageFilter]);
 
-  const filtered = useMemo(() => {
-    if (!resources) return [];
+  const { list: filtered, kind: searchMatchKind } = useMemo(() => {
+    if (!resources) return { list: [], kind: null };
     const q = query.trim().toLowerCase();
     const catMatch = (r) => activeCat === "all" || r.category === activeCat || (r.secondaryCategories || []).includes(activeCat);
     const base = resources.filter((r) => {
@@ -205,7 +233,7 @@ export default function App() {
       if (barrierFilters.length && !barrierFilters.some((b) => r.barriers?.includes(b))) return false;
       return true;
     });
-    if (!q) return base.sort((a, b) => a.name.localeCompare(b.name));
+    if (!q) return { list: base.sort((a, b) => a.name.localeCompare(b.name)), kind: null };
 
     const hayOf = (r) =>
       [
@@ -216,16 +244,28 @@ export default function App() {
         .join(" ")
         .toLowerCase();
 
-    const exact = base.filter((r) => hayOf(r).includes(q));
-    if (exact.length > 0) return exact.sort((a, b) => a.name.localeCompare(b.name));
+    // Everyday phrasing and professional jargon both find the same resources —
+    // "rehab" and "residential treatment" search the same haystack.
+    const queryVariants = [q, ...expandSearchQuery(q, SEARCH_SYNONYMS)];
 
-    // Fuzzy fallback: word-level typo tolerance when exact substring search finds nothing
+    const exact = base.filter((r) => { const hay = hayOf(r); return queryVariants.some((v) => hay.includes(v)); });
+    if (exact.length > 0) {
+      const matchedRawQuery = exact.some((r) => hayOf(r).includes(q));
+      return { list: exact.sort((a, b) => a.name.localeCompare(b.name)), kind: matchedRawQuery ? "exact" : "synonym" };
+    }
+
+    // Fuzzy fallback: word-level typo tolerance across the query and any synonym expansions,
+    // so a no-exact-match search still surfaces related results instead of a dead end.
     const fuzzy = base
-      .map((r) => ({ r, score: fuzzyScore(hayOf(r), q) }))
-      .filter((x) => x.score !== null)
+      .map((r) => {
+        const hay = hayOf(r);
+        const scores = queryVariants.map((v) => fuzzyScore(hay, v)).filter((s) => s !== null);
+        return scores.length ? { r, score: Math.min(...scores) } : null;
+      })
+      .filter(Boolean)
       .sort((a, b) => a.score - b.score)
       .map((x) => x.r);
-    return fuzzy;
+    return { list: fuzzy, kind: fuzzy.length > 0 ? "fuzzy" : null };
   }, [resources, query, activeCat, issueFilters, barrierFilters, showClosed, inScope, inLocation, inAge]);
 
   const selected = resources?.find((r) => r.id === selectedId) || null;
@@ -562,6 +602,9 @@ export default function App() {
                 ? (lang === "es" ? "¿Qué necesitas hoy?" : "What do you need today?")
                 : (lang === "es" ? "Averigüe quién ayuda a quién, con qué, cuándo." : "Find out who helps who, with what, when.")}
             </h1>
+            {audienceMode === "client" && (
+              <div style={S.clientSubhead}>Choose a need below, or describe what you're looking for.</div>
+            )}
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }} className="no-print">
             {audienceMode === "staff" && isEditor && (
@@ -586,22 +629,33 @@ export default function App() {
               <button role="tab" aria-selected={viewMode === "day"} style={{ ...S.segmentBtn, ...(viewMode === "day" ? S.segmentBtnActive : {}) }} onClick={() => setViewMode("day")}><Clock size={12} /> By Day</button>
               <button role="tab" aria-selected={viewMode === "network"} style={{ ...S.segmentBtn, ...(viewMode === "network" ? S.segmentBtnActive : {}) }} onClick={() => setViewMode("network")}><Share2 size={12} /> Network</button>
             </div>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              <button style={S.utilBtn} onClick={() => setShowInsights(true)} aria-label="View search insights"><BarChart3 size={14} /></button>
-              <button style={S.utilBtn} onClick={() => setShowPrintOptions(true)} aria-label="Print current list"><Printer size={14} /></button>
-              <button style={S.utilBtn} onClick={exportCSV} aria-label="Export all resources as CSV"><Download size={14} /></button>
-              {isEditor && (
-                <>
-                  <button style={S.utilBtn} onClick={() => fileInputRef.current?.click()} aria-label="Import resources from CSV"><Upload size={14} /></button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".csv"
-                    style={{ display: "none" }}
-                    onChange={(e) => { if (e.target.files?.[0]) importCSV(e.target.files[0]); e.target.value = ""; }}
-                  />
-                </>
+            <div style={{ position: "relative" }} ref={moreMenuRef}>
+              <button
+                style={S.utilBtn}
+                onClick={() => setShowMoreMenu(!showMoreMenu)}
+                aria-label="More actions"
+                aria-haspopup="true"
+                aria-expanded={showMoreMenu}
+              >
+                <MoreHorizontal size={14} />
+              </button>
+              {showMoreMenu && (
+                <div style={S.moreMenu} role="menu">
+                  <button role="menuitem" style={S.moreMenuItem} onClick={() => { setShowInsights(true); setShowMoreMenu(false); }}><BarChart3 size={14} /> Insights</button>
+                  <button role="menuitem" style={S.moreMenuItem} onClick={() => { setShowPrintOptions(true); setShowMoreMenu(false); }}><Printer size={14} /> Print</button>
+                  <button role="menuitem" style={S.moreMenuItem} onClick={() => { exportCSV(); setShowMoreMenu(false); }}><Download size={14} /> Export CSV</button>
+                  {isEditor && (
+                    <button role="menuitem" style={S.moreMenuItem} onClick={() => { fileInputRef.current?.click(); setShowMoreMenu(false); }}><Upload size={14} /> Import CSV</button>
+                  )}
+                </div>
               )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv"
+                style={{ display: "none" }}
+                onChange={(e) => { if (e.target.files?.[0]) importCSV(e.target.files[0]); e.target.value = ""; }}
+              />
             </div>
           </div>
         )}
@@ -647,6 +701,20 @@ export default function App() {
               </button>
             </div>
 
+            {audienceMode === "client" && activeCat === "all" && issueFilters.length === 0 && !query.trim() && (
+              <div style={S.quickNeedGrid}>
+                {CLIENT_QUICK_NEEDS.map((need) => (
+                  <button
+                    key={need.label}
+                    style={S.quickNeedBtn}
+                    onClick={() => { setIssueFilters(need.issues); setActiveCat("all"); setQuery(""); }}
+                  >
+                    {need.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {savedViews.length > 0 && (
               <div style={S.chipRow}>
                 {savedViews.map((v) => (
@@ -685,7 +753,7 @@ export default function App() {
               )}
             </div>
 
-            <div style={S.chipRow}>
+            <div style={S.categoryRow}>
               <CatChip active={activeCat === "all"} onClick={() => setActiveCat("all")} label="All" count={resources.filter((r) => (showClosed || r.status !== "closed") && inScope(r) && inLocation(r) && inAge(r)).length} />
               {Object.entries(CATEGORY_META).map(([key, meta]) => (
                 <CatChip
@@ -795,7 +863,17 @@ export default function App() {
           ) : (
             <>
               {filtered.length === 0 && (
-                <div style={S.emptyState}>Nothing matches yet. Try different filters, or add this resource yourself.</div>
+                <div style={S.emptyState}>
+                  {audienceMode === "client"
+                    ? "We couldn't find an exact match. Try removing one filter, search nearby areas, or call 211 for help finding another option."
+                    : "Nothing matches yet. Try different filters, or add this resource yourself."}
+                </div>
+              )}
+              {filtered.length > 0 && searchMatchKind === "fuzzy" && (
+                <div style={S.searchNotice}>No exact match for "{query.trim()}" — showing similar results.</div>
+              )}
+              {filtered.length > 0 && searchMatchKind === "synonym" && (
+                <div style={S.searchNotice}>Showing results related to "{query.trim()}".</div>
               )}
               {filtered.map((r) => {
                 const meta = CATEGORY_META[r.category];

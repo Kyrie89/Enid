@@ -42,6 +42,17 @@ export const BARRIER_TAGS = [
   "Telehealth available", "Confidential location", "24/7 availability",
 ];
 
+// Friendlier phrasing for a handful of tags that read as professional/clinical
+// jargon — shown only in Client View. Staff still see the underlying tag name
+// everywhere else (Edit form, filters, staff detail view), since these map
+// 1:1 to the same stored values used for matching/filtering.
+export const CLIENT_TAG_LABELS = {
+  "Reentry / justice-involved": "Help after jail or with legal barriers",
+  "Sober living / recovery housing": "A sober place to live",
+  "Criminal record OK": "Criminal record accepted",
+  "No insurance needed": "No insurance required",
+};
+
 export const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 export const DAY_SHORT = { Sunday: "Sun", Monday: "Mon", Tuesday: "Tue", Wednesday: "Wed", Thursday: "Thu", Friday: "Fri", Saturday: "Sat" };
 

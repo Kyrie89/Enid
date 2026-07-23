@@ -38,6 +38,16 @@ export function fuzzyScore(haystack, query) {
 
 export const uid = () => "r_" + Math.random().toString(36).slice(2, 10);
 
+// Finds which synonym trigger phrases appear in the (already lowercased) query
+// and returns the flattened, deduped list of their expansions.
+export function expandSearchQuery(lowerQuery, synonyms) {
+  const expansions = new Set();
+  for (const [key, values] of Object.entries(synonyms)) {
+    if (lowerQuery.includes(key)) values.forEach((v) => expansions.add(v));
+  }
+  return [...expansions];
+}
+
 // Normalizes org names before comparing, so "The Salvation Army" and "Salvation Army, The" match.
 export function normalizeName(name) {
   return (name || "")
