@@ -83,10 +83,15 @@ UI.
 - **Free Supabase projects pause after 7 days with no traffic.** A free
   uptime pinger (UptimeRobot, cron-job.org) hitting the site every few days
   prevents this until real usage makes it a non-issue.
-- **No automatic backups on the free tier.** Once real people are entering
-  real data, export the `resources` table to CSV on some regular cadence
-  (the app's own CSV export button works for this) until/unless you're on a
-  paid tier with backups.
+- **No automatic backups on the free tier**, so this repo has one:
+  `.github/workflows/backup.yml` runs weekly (Mondays, and on-demand via the
+  Actions tab's "Run workflow" button), snapshotting `resources`, `schedule`,
+  `connections`, `locations`, and `saved_views` to dated JSON files under
+  `backups/` and committing them. To turn it on, add two repo secrets
+  (Settings → Secrets and variables → Actions): `SUPABASE_URL` and
+  `SUPABASE_SERVICE_ROLE_KEY` (the same service-role key used for
+  `migrate-seed`, Settings → API in Supabase — never the anon key). The
+  app's own CSV export button still works for an on-the-spot manual copy.
 - **Approving editors is manual by design** — don't automate it away without
   thinking through who that lets in.
 
