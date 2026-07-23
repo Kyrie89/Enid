@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 
 import { supabase } from "./supabaseClient";
-import { CATEGORY_META, ISSUE_TAG_GROUPS, BARRIER_TAGS, DAYS, DAY_SHORT } from "./lib/taxonomy";
+import { CATEGORY_META, ISSUE_TAG_GROUPS, BARRIER_TAGS, QUICK_REQUIREMENT_TAGS, DAYS, DAY_SHORT } from "./lib/taxonomy";
 import { uid, findLikelyDuplicate, timeToMinutes, fuzzyScore, expandSearchQuery } from "./lib/utils";
 import { SEARCH_SYNONYMS } from "./lib/searchSynonyms";
 import { S } from "./styles";
@@ -693,13 +693,38 @@ export default function App() {
               <button
                 style={{ ...S.filterToggle, ...(activeFilterCount ? S.filterToggleActive : {}) }}
                 onClick={() => setShowFilters(!showFilters)}
-                aria-label="Toggle issue and barrier filters"
+                aria-label="Toggle more filters"
                 aria-expanded={showFilters}
               >
                 <SlidersHorizontal size={15} />
+                <span>More Filters</span>
                 {activeFilterCount > 0 && <span style={S.filterBadge}>{activeFilterCount}</span>}
               </button>
             </div>
+
+            {!showFilters && activeFilterCount > 0 && (
+              <div style={S.activeFilterSummary} aria-label="Active filters">
+                {issueFilters.map((t) => (
+                  <div key={"if_" + t} style={S.activeFilterChip}>
+                    <span style={S.activeFilterChipLabel}>{t}</span>
+                    <button style={S.activeFilterChipRemove} onClick={() => toggleFilter(issueFilters, setIssueFilters, t)} aria-label={`Remove filter ${t}`}><X size={11} /></button>
+                  </div>
+                ))}
+                {barrierFilters.map((t) => (
+                  <div key={"bf_" + t} style={S.activeFilterChip}>
+                    <span style={S.activeFilterChipLabel}>{t}</span>
+                    <button style={S.activeFilterChipRemove} onClick={() => toggleFilter(barrierFilters, setBarrierFilters, t)} aria-label={`Remove filter ${t}`}><X size={11} /></button>
+                  </div>
+                ))}
+                {ageFilter !== "" && (
+                  <div style={S.activeFilterChip}>
+                    <span style={S.activeFilterChipLabel}>Age {ageFilter}</span>
+                    <button style={S.activeFilterChipRemove} onClick={() => setAgeFilter("")} aria-label="Remove age filter"><X size={11} /></button>
+                  </div>
+                )}
+                <button style={S.clearFiltersBtn} onClick={() => { setIssueFilters([]); setBarrierFilters([]); setAgeFilter(""); }}>Clear all</button>
+              </div>
+            )}
 
             {audienceMode === "client" && activeCat === "all" && issueFilters.length === 0 && !query.trim() && (
               <div style={S.quickNeedGrid}>
@@ -776,9 +801,19 @@ export default function App() {
               )}
             </div>
 
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#6b7178", letterSpacing: 0.5, marginBottom: 6, fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
+              IMPORTANT REQUIREMENTS
+            </div>
+            <div style={S.quickReqRow}>
+              {QUICK_REQUIREMENT_TAGS.map((t) => (
+                <TagChip key={t} label={t} active={barrierFilters.includes(t)} onClick={() => toggleFilter(barrierFilters, setBarrierFilters, t)} />
+              ))}
+            </div>
+
             {showFilters && (
               <div style={S.filterPanel}>
-                <div style={S.filterGroupLabel}><Tag size={12} /> ISSUE</div>
+                <div style={S.filterHint}>Selecting more than one option below matches resources with any of them, not only ones with all of them.</div>
+                <div style={{ ...S.filterGroupLabel, marginTop: 12 }}><Tag size={12} /> ISSUE</div>
                 {ISSUE_TAG_GROUPS.map((group) => (
                   <div key={group.label} style={{ marginBottom: 8 }}>
                     <div style={S.tagGroupLabel}>{group.label}</div>

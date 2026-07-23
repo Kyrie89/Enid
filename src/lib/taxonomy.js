@@ -40,6 +40,15 @@ export const BARRIER_TAGS = [
   "No ID required", "Criminal record OK", "Walk-ins welcome",
   "Appointment required", "Transportation provided", "Interpreter available",
   "Telehealth available", "Confidential location", "24/7 availability",
+  "Wheelchair accessible", "Spanish available",
+];
+
+// Small curated subset of BARRIER_TAGS surfaced as an always-visible
+// "Important requirements" quick-filter row, so the most commonly-needed
+// access questions don't require opening More Filters.
+export const QUICK_REQUIREMENT_TAGS = [
+  "Free", "Medicaid accepted", "No ID required", "Transportation provided",
+  "Wheelchair accessible", "Interpreter available", "Criminal record OK", "24/7 availability",
 ];
 
 // Friendlier phrasing for a handful of tags that read as professional/clinical
