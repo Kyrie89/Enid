@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   MapPin, Phone, Globe, Clock, Users, AlertTriangle, ShieldCheck, Link2,
-  Edit3, Trash2, Copy, Navigation, X,
+  Edit3, Trash2, Copy, Navigation, X, Printer,
 } from "lucide-react";
 import { S } from "../styles";
 import { CATEGORY_META, DAYS, DAY_SHORT } from "../lib/taxonomy";
 import { getVerificationInfo } from "../lib/utils";
 import { Field, InfoBlock, ConnectionRow } from "./shared";
 
-export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJump, audienceMode, showToast, canEdit }) {
+export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJump, audienceMode, showToast, canEdit, onPrint }) {
   const [confirmAction, setConfirmAction] = useState(null); // null | "close" | "delete"
   const confirmCancelRef = useRef(null);
   const meta = CATEGORY_META[resource.category];
@@ -191,9 +191,10 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
         <div style={S.attribution}>Last edited by {resource.editedBy}{resource.editedDate ? ` on ${resource.editedDate}` : ""}</div>
       )}
 
-      <div style={S.detailActions}>
+      <div style={S.detailActions} className="no-print">
         {!isClient && canEdit && <button style={S.editBtn} onClick={onEdit}><Edit3 size={14} /> Edit</button>}
         <button style={S.shareBtn} onClick={copyShare}><Copy size={14} /> Copy to text a client</button>
+        {!isClient && <button style={S.shareBtn} onClick={onPrint}><Printer size={14} /> Print this resource</button>}
         {!isClient && canEdit && resource.status !== "closed" && (
           <button style={S.closeBtn} onClick={() => setConfirmAction("close")}>
             Mark closed

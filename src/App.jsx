@@ -54,6 +54,7 @@ export default function App() {
   const [lang, setLang] = useState("en");
   const [showInsights, setShowInsights] = useState(false);
   const [showPrintOptions, setShowPrintOptions] = useState(false);
+  const [printSingleMode, setPrintSingleMode] = useState(false);
   const [printFields, setPrintFields] = useState({ phone: true, address: true, website: false, insurance: false, populations: false, issues: false, barriers: false, notes: false });
   const [savedViews, setSavedViews] = useState([]);
   const [savingViewName, setSavingViewName] = useState("");
@@ -68,6 +69,13 @@ export default function App() {
   const showToast = useCallback((msg) => {
     setToast(msg);
     setTimeout(() => setToast(""), 2200);
+  }, []);
+
+  const printResource = useCallback(() => {
+    setPrintSingleMode(true);
+    const reset = () => setPrintSingleMode(false);
+    window.addEventListener("afterprint", reset, { once: true });
+    requestAnimationFrame(() => window.print());
   }, []);
 
   /* ---- auth ---- */
@@ -497,6 +505,8 @@ export default function App() {
           .detailPane { display: none !important; }
           .print-item { break-inside: avoid; border-bottom: 1px solid #ccc !important; padding: 10px 0 !important; }
           .print-only { display: block !important; }
+          .split.print-single .listPane { display: none !important; }
+          .split.print-single .detailPane { display: block !important; }
         }
       `}</style>
 
@@ -706,7 +716,7 @@ export default function App() {
       </div>
       </header>
 
-      <div className={`split ${(selected || editing) ? "has-detail" : ""}`} style={{ ...S.split, ...(viewMode === "network" ? { flexDirection: "column" } : {}) }}>
+      <div className={`split ${(selected || editing) ? "has-detail" : ""} ${printSingleMode ? "print-single" : ""}`} style={{ ...S.split, ...(viewMode === "network" ? { flexDirection: "column" } : {}) }}>
         <div className="listPane" style={{ ...S.listPane, ...(viewMode === "network" ? { width: "100%", maxWidth: "100%", maxHeight: 560 } : {}) }}>
           {viewMode === "day" ? (
             <>
@@ -830,6 +840,7 @@ export default function App() {
               audienceMode={audienceMode}
               showToast={showToast}
               canEdit={isEditor}
+              onPrint={printResource}
             />
           ) : (
             <div style={S.placeholder}>
