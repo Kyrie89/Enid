@@ -6,6 +6,7 @@ import {
 import { S } from "../styles";
 import { CATEGORY_META, DAYS, DAY_SHORT } from "../lib/taxonomy";
 import { getVerificationInfo } from "../lib/utils";
+import { supabase } from "../supabaseClient";
 import { Field, InfoBlock, ConnectionRow } from "./shared";
 
 function formatAgeRange(min, max) {
@@ -16,7 +17,17 @@ function formatAgeRange(min, max) {
 
 export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJump, audienceMode, showToast, canEdit, onPrint }) {
   const [confirmAction, setConfirmAction] = useState(null); // null | "close" | "delete"
+  const [accuracyVote, setAccuracyVote] = useState(null); // null | "yes" | "no"
   const confirmCancelRef = useRef(null);
+
+  useEffect(() => { setAccuracyVote(null); }, [resource.id]);
+
+  const submitAccuracyVote = async (isAccurate) => {
+    setAccuracyVote(isAccurate ? "yes" : "no");
+    await supabase.from("accuracy_reports").insert({
+      resource_id: resource.id, is_accurate: isAccurate, source: audienceMode,
+    });
+  };
   const meta = CATEGORY_META[resource.category];
   const Icon = meta.icon;
   const isClient = audienceMode === "client";
@@ -230,6 +241,20 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
       {!isClient && resource.editedBy && (
         <div style={S.attribution}>Last edited by {resource.editedBy}{resource.editedDate ? ` on ${resource.editedDate}` : ""}</div>
       )}
+
+      <div className="no-print" style={{ marginTop: 16, padding: "10px 12px", background: "#f8f7f3", borderRadius: 8, fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
+        {accuracyVote ? (
+          <div style={{ fontSize: 13, color: "#2f6f5e", fontWeight: 600 }}>
+            {accuracyVote === "yes" ? "Thanks for confirming!" : "Thanks — we'll get this checked."}
+          </div>
+        ) : (
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 13, color: "#5c6066", fontWeight: 600 }}>Is this information still accurate?</span>
+            <button type="button" onClick={() => submitAccuracyVote(true)} style={{ ...S.catPick, borderColor: "#2f6f5e", color: "#2f6f5e", background: "#fff" }}>Yes</button>
+            <button type="button" onClick={() => submitAccuracyVote(false)} style={{ ...S.catPick, borderColor: "#b3413a", color: "#b3413a", background: "#fff" }}>No</button>
+          </div>
+        )}
+      </div>
 
       <div style={S.detailActions} className="no-print">
         {!isClient && canEdit && <button style={S.editBtn} onClick={onEdit}><Edit3 size={14} /> Edit</button>}

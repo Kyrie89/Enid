@@ -6,6 +6,7 @@ import { supabase } from "../supabaseClient";
 
 export function InsightsPanel({ onClose, resources }) {
   const [misses, setMisses] = useState(null);
+  const [flagged, setFlagged] = useState(null);
   const [loading, setLoading] = useState(true);
   const closeBtnRef = useRef(null);
 
@@ -22,6 +23,23 @@ export function InsightsPanel({ onClose, resources }) {
       setLoading(false);
     })();
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase
+        .from("accuracy_reports")
+        .select("resource_id")
+        .eq("is_accurate", false);
+      if (error) { setFlagged([]); return; }
+      const counts = {};
+      data.forEach(({ resource_id }) => { counts[resource_id] = (counts[resource_id] || 0) + 1; });
+      const byResource = Object.entries(counts)
+        .map(([id, count]) => ({ resource: resources.find((r) => r.id === id), count }))
+        .filter((x) => x.resource)
+        .sort((a, b) => b.count - a.count);
+      setFlagged(byResource);
+    })();
+  }, [resources]);
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === "Escape") onClose(); };
@@ -69,6 +87,20 @@ export function InsightsPanel({ onClose, resources }) {
             <div style={S.insightLabel}>Marked closed</div>
           </div>
         </div>
+
+        {flagged && flagged.length > 0 && (
+          <>
+            <div style={S.sectionLabel}>FLAGGED AS OUTDATED</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 16 }}>
+              {flagged.map(({ resource, count }) => (
+                <div key={resource.id} style={S.missRow}>
+                  <span style={{ fontWeight: 600 }}>{resource.name}</span>
+                  <span style={{ color: "#b3413a" }}>{count} report{count === 1 ? "" : "s"}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
         <div style={S.sectionLabel}>SEARCHES THAT FOUND NOTHING</div>
         {loading && <div style={{ fontSize: 13, color: "#9aa0a6" }}>Loading…</div>}
