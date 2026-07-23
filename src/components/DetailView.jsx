@@ -26,7 +26,11 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
     ? resources.filter((r) => r.id !== resource.id && r.parentOrg?.trim().toLowerCase() === resource.parentOrg.trim().toLowerCase())
     : [];
 
-  const directionsUrl = resource.address
+  // "Confidential location" is a real safety flag (DV shelters, etc.) — the address and
+  // a Directions deep-link stay hidden from the client-facing view regardless of print/share.
+  const isConfidential = resource.barriers?.includes("Confidential location");
+  const showAddress = resource.address && !(isClient && isConfidential);
+  const directionsUrl = showAddress
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(resource.address)}`
     : null;
 
@@ -41,7 +45,7 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
   const shareText = () => {
     const lines = [resource.name];
     if (resource.subcategory) lines.push(resource.subcategory);
-    if (resource.address) lines.push(resource.address);
+    if (showAddress) lines.push(resource.address);
     if (resource.phone) lines.push(resource.phone);
     if (resource.website) lines.push(resource.website);
     if (resource.schedule?.length) {
@@ -119,7 +123,13 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
       })()}
 
       <div style={S.fieldGrid}>
-        {resource.address && <Field icon={MapPin} label="Address" value={resource.address} href={!isClient ? directionsUrl : null} external={!isClient} />}
+        {showAddress && <Field icon={MapPin} label="Address" value={resource.address} href={!isClient ? directionsUrl : null} external={!isClient} />}
+        {isClient && isConfidential && resource.address && (
+          <div style={S.fieldRow}>
+            <ShieldCheck size={14} color="#8a9099" style={{ marginTop: 2, flexShrink: 0 }} />
+            <div style={{ fontSize: 14, color: "#3c4146" }}>Address is confidential for safety — call for details.</div>
+          </div>
+        )}
         {!isClient && resource.phone && <Field icon={Phone} label="Phone" value={resource.phone} href={`tel:${resource.phone.replace(/[^0-9+]/g, "")}`} />}
         {resource.website && <Field icon={Globe} label="Website" value={resource.website.replace(/^https?:\/\//, "")} href={resource.website} external />}
       </div>
@@ -128,14 +138,17 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
         <div style={{ marginTop: 8, marginBottom: 6 }}>
           <div style={S.infoBlockTitle}><MapPin size={13} /> Other locations</div>
           {resource.locations.map((l) => {
-            const locDirections = l.address
+            const showLocAddress = l.address && !(isClient && isConfidential);
+            const locDirections = showLocAddress
               ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(l.address)}`
               : null;
             return (
               <div key={l.id} style={{ fontSize: 13.5, color: "#3c4146", marginBottom: 6, lineHeight: 1.5 }}>
                 <span style={{ fontWeight: 600 }}>{l.label}</span>
                 {" — "}
-                {locDirections ? (
+                {!showLocAddress ? (
+                  "confidential — call for details"
+                ) : locDirections ? (
                   <a href={locDirections} target="_blank" rel="noreferrer" style={{ color: "inherit" }}>{l.address}</a>
                 ) : (
                   l.address

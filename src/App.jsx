@@ -66,7 +66,12 @@ export default function App() {
   const fileInputRef = useRef(null);
 
   const isEditor = true; // TEMP: auth disabled while populating content — restore !!editorProfile before real launch
-  const editorDisplayName = editorProfile?.display_name || "";
+  // With sign-in removed, editorProfile.display_name is dead — nothing sets a session
+  // anymore, so every edit was silently attributed "Unattributed" with no way to fix it.
+  // A remembered local name restores real attribution without needing auth back.
+  const [editorName, setEditorName] = useState(() => { try { return localStorage.getItem("enid_editor_name") || ""; } catch { return ""; } });
+  useEffect(() => { try { localStorage.setItem("enid_editor_name", editorName); } catch {} }, [editorName]);
+  const editorDisplayName = editorName.trim() || editorProfile?.display_name || "";
 
   const showToast = useCallback((msg) => {
     setToast(msg);
@@ -246,13 +251,14 @@ export default function App() {
     if (!resources) return [];
     const list = [];
     resources.forEach((r) => {
-      if (r.isStatewide) return;
+      if (!showClosed && r.status === "closed") return;
+      if (!inScope(r) || !inLocation(r) || !inAge(r)) return;
       (r.schedule || []).forEach((occ) => {
         if (occ.day === selectedDay) list.push({ ...occ, resource: r });
       });
     });
     return list.sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
-  }, [resources, selectedDay]);
+  }, [resources, selectedDay, showClosed, inScope, inLocation, inAge]);
 
   const toggleFilter = (list, setList, val) => {
     setList(list.includes(val) ? list.filter((v) => v !== val) : [...list, val]);
@@ -393,6 +399,7 @@ export default function App() {
       notes: r.notes || "",
       issues: (r.issues || []).join(" | "),
       barriers: (r.barriers || []).join(" | "),
+      connections: (r.connections || []).join(" | "),
       schedule: (r.schedule || []).map((s) => `${s.day}@${s.time}@${s.label}@${s.frequency}`).join(" ; "),
       locations: (r.locations || []).map((l) => `${l.label}@${l.address}@${l.phone}@${l.notes}`).join(" ; "),
       verifiedDate: r.verifiedDate || "",
@@ -813,7 +820,7 @@ export default function App() {
                       <div style={{ ...S.listItemName, ...(isClient ? { fontSize: 16 } : {}) }}>{r.name}</div>
                       <div style={S.listItemSub}>
                         {isClient
-                          ? [r.barriers?.includes("Free") ? "Free" : null, r.address || null].filter(Boolean).join(" · ") || meta.label
+                          ? [r.barriers?.includes("Free") ? "Free" : null, r.barriers?.includes("Confidential location") ? null : r.address || null].filter(Boolean).join(" · ") || meta.label
                           : (r.subcategory || meta.label)}
                       </div>
                       {!isClient && (
@@ -864,7 +871,7 @@ export default function App() {
               onSave={saveDraft} onCancel={() => setEditing(null)}
               connectPicker={connectPicker} setConnectPicker={setConnectPicker}
               toggleConnection={toggleConnection} toggleDraftTag={toggleDraftTag}
-              editorDisplayName={editorDisplayName}
+              editorName={editorName} setEditorName={setEditorName}
             />
           ) : selected ? (
             <DetailView

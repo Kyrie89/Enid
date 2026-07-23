@@ -69,7 +69,7 @@ export function ScheduleEditor({ draft, setDraft }) {
       </div>
 
       <div style={S.scheduleAddRow}>
-        <input style={{ ...S.input, flex: "0 0 110px" }} placeholder="Time" value={time} onChange={(e) => setTime(e.target.value)} />
+        <input style={{ ...S.input, flex: "0 0 110px" }} placeholder="Time (e.g. 9:00 AM)" value={time} onChange={(e) => setTime(e.target.value)} />
         <input style={{ ...S.input, flex: 1 }} placeholder="What's available (e.g. Food pantry)" value={label} onChange={(e) => setLabel(e.target.value)} />
       </div>
       <div style={{ display: "flex", gap: 8, marginTop: 8 }}>

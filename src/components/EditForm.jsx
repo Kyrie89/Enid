@@ -9,9 +9,10 @@ import { LocationsEditor } from "./LocationsEditor";
 export function EditForm({
   draft, setDraft, resources, onSave, onCancel,
   connectPicker, setConnectPicker, toggleConnection, toggleDraftTag,
-  editorDisplayName,
+  editorName, setEditorName,
 }) {
   const [nameError, setNameError] = useState(false);
+  const [connectSearch, setConnectSearch] = useState("");
   const set = (k) => (e) => setDraft({ ...draft, [k]: e.target.value });
   const others = resources.filter((r) => r.id !== draft.id);
   const secondary = draft.secondaryCategories || [];
@@ -29,10 +30,14 @@ export function EditForm({
         <button style={S.iconBtn} onClick={onCancel} aria-label="Cancel and close form"><X size={16} /></button>
       </div>
 
-      <FormRow label="Editing as">
-        <div style={{ fontSize: 13.5, color: "#5c6066", fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
-          {editorDisplayName || "Unattributed"}
-        </div>
+      <FormRow label="Editing as" htmlFor="field-editor-name">
+        <input
+          id="field-editor-name"
+          style={{ ...S.input, maxWidth: 260 }}
+          value={editorName}
+          onChange={(e) => setEditorName(e.target.value)}
+          placeholder="Your name (remembered on this device)"
+        />
       </FormRow>
 
       <FormRow label="Name *" htmlFor="field-name">
@@ -159,7 +164,7 @@ export function EditForm({
       </FormRow>
 
       <FormRow label="Won't work for / exclusions (saves a wasted referral)" htmlFor="field-exclusions">
-        <input id="field-exclusions" style={S.input} value={draft.exclusions || ""} onChange={set("exclusions")} placeholder="e.g. 18+ only, no active psychosis, no walk-ins" />
+        <input id="field-exclusions" style={S.input} value={draft.exclusions || ""} onChange={set("exclusions")} placeholder="e.g. no active psychosis, no walk-ins, must be a Garfield County resident" />
       </FormRow>
 
       <FormRow label="Insurance / cost" htmlFor="field-insurance">
@@ -233,8 +238,16 @@ export function EditForm({
         </button>
         {connectPicker && (
           <div style={S.connectList}>
+            {others.length > 5 && (
+              <input
+                style={{ ...S.input, marginBottom: 4 }}
+                placeholder="Search resources to link..."
+                value={connectSearch}
+                onChange={(e) => setConnectSearch(e.target.value)}
+              />
+            )}
             {others.length === 0 && <div style={{ fontSize: 13, color: "#9aa0a6", padding: 8 }}>Add other resources first.</div>}
-            {others.map((r) => {
+            {others.filter((r) => r.name.toLowerCase().includes(connectSearch.toLowerCase())).map((r) => {
               const on = draft.connections.includes(r.id);
               return (
                 <button key={r.id} onClick={() => toggleConnection(r.id)} style={{ ...S.connectPickItem, background: on ? "#2f6f5e14" : "#fff", borderColor: on ? "#2f6f5e" : "#eceae4" }}>
