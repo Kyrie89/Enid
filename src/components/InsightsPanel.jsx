@@ -44,7 +44,7 @@ export function InsightsPanel({ onClose, resources }) {
   const topMisses = misses || [];
 
   return (
-    <div style={S.modalOverlay} onClick={onClose}>
+    <div className="no-print" style={S.modalOverlay} onClick={onClose}>
       <div style={S.modalCard} onClick={(e) => e.stopPropagation()}>
         <div style={S.formHeader}>
           <h2 style={{ margin: 0, fontSize: 18 }}>Insights</h2>

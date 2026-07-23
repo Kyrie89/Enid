@@ -23,6 +23,17 @@ const emptyDraft = () => ({
   city: "", isStatewide: false,
 });
 
+const PRINT_FIELD_OPTIONS = [
+  { key: "phone", label: "Phone" },
+  { key: "address", label: "Address" },
+  { key: "website", label: "Website" },
+  { key: "insurance", label: "Insurance / cost" },
+  { key: "populations", label: "Population served" },
+  { key: "issues", label: "Issues addressed" },
+  { key: "barriers", label: "Barriers removed" },
+  { key: "notes", label: "Notes" },
+];
+
 /* ---------------- app ---------------- */
 export default function App() {
   const [resources, setResources] = useState(null);
@@ -42,6 +53,8 @@ export default function App() {
   const [locationFilter, setLocationFilter] = useState("all");
   const [lang, setLang] = useState("en");
   const [showInsights, setShowInsights] = useState(false);
+  const [showPrintOptions, setShowPrintOptions] = useState(false);
+  const [printFields, setPrintFields] = useState({ phone: true, address: true, website: false, insurance: false, populations: false, issues: false, barriers: false, notes: false });
   const [savedViews, setSavedViews] = useState([]);
   const [savingViewName, setSavingViewName] = useState("");
   const [audienceMode, setAudienceMode] = useState("staff"); // "staff" | "client"
@@ -482,6 +495,7 @@ export default function App() {
           .listPane { max-height: none !important; overflow: visible !important; width: 100% !important; max-width: 100% !important; border: none !important; }
           .split { flex-direction: column !important; max-width: 100% !important; }
           .print-item { break-inside: avoid; border-bottom: 1px solid #ccc !important; padding: 10px 0 !important; }
+          .print-only { display: block !important; }
         }
       `}</style>
 
@@ -522,7 +536,7 @@ export default function App() {
             </div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               <button style={S.utilBtn} onClick={() => setShowInsights(true)} aria-label="View search insights"><BarChart3 size={14} /></button>
-              <button style={S.utilBtn} onClick={() => window.print()} aria-label="Print current list"><Printer size={14} /></button>
+              <button style={S.utilBtn} onClick={() => setShowPrintOptions(true)} aria-label="Print current list"><Printer size={14} /></button>
               <button style={S.utilBtn} onClick={exportCSV} aria-label="Export all resources as CSV"><Download size={14} /></button>
               {isEditor && (
                 <>
@@ -755,6 +769,18 @@ export default function App() {
                           ? [r.barriers?.includes("Free") ? "Free" : null, r.address || null].filter(Boolean).join(" · ") || meta.label
                           : (r.subcategory || meta.label)}
                       </div>
+                      {!isClient && (
+                        <div className="print-only" style={S.printDetails}>
+                          {printFields.phone && r.phone && <div>{r.phone}</div>}
+                          {printFields.address && r.address && <div>{r.address}</div>}
+                          {printFields.website && r.website && <div>{r.website}</div>}
+                          {printFields.insurance && r.insurance && <div>{r.insurance}</div>}
+                          {printFields.populations && r.populations && <div>Serves: {r.populations}</div>}
+                          {printFields.issues && r.issues?.length > 0 && <div>Addresses: {r.issues.join(", ")}</div>}
+                          {printFields.barriers && r.barriers?.length > 0 && <div>Barriers removed: {r.barriers.join(", ")}</div>}
+                          {printFields.notes && r.notes && <div>{r.notes}</div>}
+                        </div>
+                      )}
                     </div>
                     {isClient && r.phone && (
                       <a
@@ -819,6 +845,40 @@ export default function App() {
 
       {toast && <div style={S.toast}>{toast}</div>}
       {showInsights && <InsightsPanel onClose={() => setShowInsights(false)} resources={resources} />}
+      {showPrintOptions && (
+        <div className="no-print" style={S.modalOverlay} onClick={() => setShowPrintOptions(false)}>
+          <div style={S.modalCard} onClick={(e) => e.stopPropagation()}>
+            <div style={S.formHeader}>
+              <h2 style={{ margin: 0, fontSize: 18 }}>Print options</h2>
+              <button style={S.iconBtn} onClick={() => setShowPrintOptions(false)} aria-label="Close print options"><X size={16} /></button>
+            </div>
+            <div style={{ fontSize: 12.5, color: "#6b7178", marginBottom: 14, fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
+              Choose which details to include under each resource's name in the printed list.
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
+              {PRINT_FIELD_OPTIONS.map(({ key, label }) => (
+                <label key={key} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13.5, fontFamily: "'Helvetica Neue', Arial, sans-serif", color: "#2f3437" }}>
+                  <input
+                    type="checkbox"
+                    checked={!!printFields[key]}
+                    onChange={(e) => setPrintFields({ ...printFields, [key]: e.target.checked })}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                style={{ ...S.saveBtn, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+                onClick={() => { window.print(); setShowPrintOptions(false); }}
+              >
+                <Printer size={14} /> Print
+              </button>
+              <button style={S.cancelBtn} onClick={() => setShowPrintOptions(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

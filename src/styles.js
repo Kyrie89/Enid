@@ -58,6 +58,7 @@ export const S = {
   listIconWrap: { width: 32, height: 32, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
   listItemName: { fontSize: 14, fontWeight: 600, color: "#2f3437", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: 1.3 },
   listItemSub: { fontSize: 12, color: "#6b7178", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  printDetails: { display: "none", fontSize: 11.5, color: "#3c4146", marginTop: 3, lineHeight: 1.5, fontFamily: "'Helvetica Neue', Arial, sans-serif" },
   detailPane: { flex: 1, minWidth: 0 },
   mobileBackBtn: { display: "none", alignItems: "center", gap: 4, border: "none", background: "transparent", color: "#a8632a", fontSize: 14, fontWeight: 600, fontFamily: "'Helvetica Neue', Arial, sans-serif", padding: "16px 16px 0" },
   placeholder: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "60vh" },
