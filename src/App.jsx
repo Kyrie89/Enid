@@ -461,6 +461,11 @@ export default function App() {
         input, textarea, select { font-family: inherit; }
         ::placeholder { color: #9aa0a6; }
         button { cursor: pointer; }
+        button:not(:disabled) { transition: filter 0.12s ease, background-color 0.12s ease; }
+        button:not(:disabled):hover { filter: brightness(0.95); }
+        a:hover { opacity: 0.82; }
+        .listPane button:not([aria-current="true"]):hover { background-color: #f6f4ee !important; filter: none; }
+        button[role="tab"][aria-selected="false"]:hover { background-color: rgba(255,255,255,0.65) !important; filter: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
         @media (max-width: 720px) {
           .split { flex-direction: column !important; }
@@ -702,6 +707,7 @@ export default function App() {
                     key={occ.resource.id + occ.id + i}
                     style={{ ...S.listItem, ...(selectedId === occ.resource.id ? S.listItemActive : {}), alignItems: "flex-start" }}
                     onClick={() => { setSelectedId(occ.resource.id); setEditing(null); }}
+                    aria-current={selectedId === occ.resource.id ? "true" : undefined}
                   >
                     <div style={{ ...S.listIconWrap, background: meta.color + "1a", color: meta.color }}>
                       <Icon size={16} />
@@ -737,6 +743,7 @@ export default function App() {
                       ...(isClient ? S.listItemClient : {}),
                     }}
                     onClick={() => { setSelectedId(r.id); setEditing(null); }}
+                    aria-current={selectedId === r.id ? "true" : undefined}
                   >
                     <div style={{ ...S.listIconWrap, ...(isClient ? { width: 40, height: 40 } : {}), background: meta.color + "1a", color: meta.color }}>
                       <Icon size={isClient ? 19 : 16} />
