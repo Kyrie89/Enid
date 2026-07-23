@@ -15,7 +15,6 @@ import { NetworkView } from "./components/NetworkView";
 import { InsightsPanel } from "./components/InsightsPanel";
 import { DetailView } from "./components/DetailView";
 import { EditForm } from "./components/EditForm";
-import { AuthBar } from "./components/AuthBar";
 
 const emptyDraft = () => ({
   id: uid(), name: "", category: "treatment", secondaryCategories: [], subcategory: "", address: "", phone: "",
@@ -507,12 +506,6 @@ export default function App() {
             </button>
           </div>
         </div>
-
-        {audienceMode === "staff" && (
-          <div className="no-print">
-            <AuthBar session={session} isEditor={isEditor} displayName={editorDisplayName} />
-          </div>
-        )}
 
         {audienceMode === "staff" && (
           <div style={S.utilityRow} className="no-print utility-row">
