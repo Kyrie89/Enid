@@ -75,14 +75,16 @@ export function findLikelyDuplicate(resources, name, excludeId) {
   return null;
 }
 
+// Plain, honest phrasing instead of a blanket "Verified" — someone deciding whether
+// to trust this listing should know at a glance whether it was actually rechecked recently.
 export function getVerificationInfo(resource) {
-  if (!resource.verifiedDate) return { level: "never", label: "Never verified" };
+  if (!resource.verifiedDate) return { level: "never", label: "Not yet verified" };
   const verified = new Date(resource.verifiedDate + "T00:00:00");
   const now = new Date();
   const months = (now.getFullYear() - verified.getFullYear()) * 12 + (now.getMonth() - verified.getMonth());
   const dateStr = verified.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
-  if (months >= STALE_MONTHS) return { level: "stale", label: `Verified ${dateStr} — ${months} months ago, due for a recheck` };
-  return { level: "fresh", label: `Verified ${dateStr}` };
+  if (months >= STALE_MONTHS) return { level: "stale", label: `Some information needs confirmation — last checked ${dateStr} (${months} months ago)` };
+  return { level: "fresh", label: `Recently confirmed ${dateStr}` };
 }
 
 export function timeToMinutes(t) {

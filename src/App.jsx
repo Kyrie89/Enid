@@ -206,6 +206,12 @@ export default function App() {
     return [...set].sort();
   }, [resources]);
 
+  // So the day picker leads with today instead of always Sunday, regardless of when someone opens it.
+  const daysFromToday = useMemo(() => {
+    const startIdx = new Date().getDay();
+    return [...DAYS.slice(startIdx), ...DAYS.slice(0, startIdx)];
+  }, []);
+
   // Regional/national and countywide resources aren't tied to one city, so they
   // ignore the location filter and always show up once their scope is included.
   const inScope = useCallback((r) => (
@@ -668,7 +674,7 @@ export default function App() {
 
         {viewMode === "day" ? (
           <div style={S.chipRow}>
-            {DAYS.map((d) => (
+            {daysFromToday.map((d) => (
               <button
                 key={d}
                 onClick={() => setSelectedDay(d)}
@@ -946,7 +952,7 @@ export default function App() {
                         const costLabel = r.barriers?.includes("Free") ? "Free" : r.barriers?.includes("Sliding scale") ? "Sliding scale" : r.barriers?.includes("Medicaid accepted") ? "Medicaid accepted" : null;
                         const v = getVerificationInfo(r);
                         const dotColor = v.level === "fresh" ? "#2f6f5e" : v.level === "stale" ? "#a8632a" : "#c2c6cc";
-                        const verifShort = v.level === "fresh" ? "Verified" : v.level === "stale" ? "Needs recheck" : "Not verified";
+                        const verifShort = v.level === "fresh" ? "Recently confirmed" : v.level === "stale" ? "Needs confirming" : "Not yet verified";
                         return (
                           <div className="no-print" style={S.listItemMeta}>
                             {costLabel && <span style={S.costTag}>{costLabel}</span>}

@@ -212,7 +212,7 @@ export function EditForm({
             <ShieldCheck size={13} /> Mark verified today
           </button>
           <span style={{ fontSize: 12.5, color: "#8a9099", fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
-            {draft.verifiedDate ? `Last verified ${draft.verifiedDate}` : "Never verified"}
+            {draft.verifiedDate ? `Last confirmed ${draft.verifiedDate}` : "Not yet verified"}
           </span>
         </div>
       </FormRow>

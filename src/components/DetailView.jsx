@@ -129,7 +129,7 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
         return (
           <div style={S.warnBanner}>
             <AlertTriangle size={14} />
-            {v.level === "never" ? "Never verified" : v.label} — double-check hours, phone, and insurance before referring someone here.
+            {v.label} — double-check hours, phone, and insurance before referring someone here.
           </div>
         );
       })()}
