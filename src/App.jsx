@@ -513,7 +513,7 @@ export default function App() {
               <button role="tab" aria-selected={viewMode === "browse"} style={{ ...S.segmentBtn, ...(viewMode === "browse" ? S.segmentBtnActive : {}) }} onClick={() => setViewMode("browse")}>List</button>
               <button role="tab" aria-selected={viewMode === "day"} style={{ ...S.segmentBtn, ...(viewMode === "day" ? S.segmentBtnActive : {}) }} onClick={() => setViewMode("day")}><Clock size={12} /> By Day</button>
               <button role="tab" aria-selected={viewMode === "network"} style={{ ...S.segmentBtn, ...(viewMode === "network" ? S.segmentBtnActive : {}) }} onClick={() => setViewMode("network")}><Share2 size={12} /> Network</button>
-              <button role="tab" aria-selected={viewMode === "statewide"} style={{ ...S.segmentBtn, ...(viewMode === "statewide" ? S.segmentBtnActive : {}) }} onClick={() => setViewMode("statewide")}><Phone size={12} /> Statewide</button>
+              <button role="tab" aria-selected={viewMode === "statewide"} style={{ ...S.segmentBtn, ...(viewMode === "statewide" ? S.segmentBtnActive : {}) }} onClick={() => setViewMode("statewide")}><Phone size={12} /> Regional & National</button>
             </div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               <button style={S.utilBtn} onClick={() => setShowInsights(true)} aria-label="View search insights"><BarChart3 size={14} /></button>
@@ -566,7 +566,7 @@ export default function App() {
               <Search size={16} color="#6b7280" />
               <input
                 style={S.searchInput}
-                placeholder="Search statewide services & hotlines..."
+                placeholder="Search regional & national services, hotlines, and out-of-area connections..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />

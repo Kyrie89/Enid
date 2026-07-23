@@ -89,7 +89,7 @@ export function EditForm({
             checked={!!draft.isStatewide}
             onChange={(e) => setDraft({ ...draft, isStatewide: e.target.checked })}
           />
-          This is a statewide/national hotline or program, not a specific local address — list it under the Statewide tab instead of by city
+          This is a statewide hotline, national program, or out-of-area community connection rather than a specific local address — list it under the Regional & National tab instead of by city
         </label>
       </FormRow>
 

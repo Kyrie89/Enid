@@ -51,7 +51,7 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
             <div style={{ fontSize: 12, fontWeight: 600, color: meta.color, letterSpacing: 0.3 }}>{meta.label.toUpperCase()}</div>
             {resource.isStatewide && (
               <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.3, color: "#4a5a8a", background: "#4a5a8a14", borderRadius: 10, padding: "2px 8px" }}>
-                STATEWIDE / HOTLINE
+                REGIONAL / NATIONAL
               </span>
             )}
           </div>
