@@ -52,7 +52,7 @@ export default function App() {
   const [showClosed, setShowClosed] = useState(false);
   const [locationFilter, setLocationFilter] = useState("all");
   const [scopeFilter, setScopeFilter] = useState("local"); // "local" | "regional" | "all"
-  const [lang, setLang] = useState("en");
+  const lang = "en"; // TEMP: language toggle removed since resource content itself doesn't translate
   const [showInsights, setShowInsights] = useState(false);
   const [showPrintOptions, setShowPrintOptions] = useState(false);
   const [printSingleMode, setPrintSingleMode] = useState(false);
@@ -566,15 +566,7 @@ export default function App() {
                   />
                 </>
               )}
-              <button style={S.utilBtn} onClick={() => setLang(lang === "en" ? "es" : "en")} aria-label="Toggle language">{lang === "en" ? "ES" : "EN"}</button>
             </div>
-          </div>
-        )}
-
-        {audienceMode === "client" && (
-          <div style={S.utilityRow} className="no-print utility-row">
-            <div />
-            <button style={S.utilBtn} onClick={() => setLang(lang === "en" ? "es" : "en")} aria-label="Toggle language">{lang === "en" ? "ES" : "EN"}</button>
           </div>
         )}
 
