@@ -480,6 +480,7 @@ export default function App() {
       `}</style>
 
       <header style={S.header}>
+      <div style={S.headerContent}>
         <div style={S.headerInner}>
           <div>
             <div style={S.eyebrow}>{audienceMode === "client" ? (lang === "es" ? "ENID, OK · OBTENER AYUDA" : "ENID, OK · GET HELP") : "ENID, OK · RESOURCE NETWORK"}</div>
@@ -687,6 +688,7 @@ export default function App() {
             )}
           </>
         )}
+      </div>
       </header>
 
       <div className={`split ${(selected || editing) ? "has-detail" : ""}`} style={{ ...S.split, ...(viewMode === "network" ? { flexDirection: "column" } : {}) }}>
