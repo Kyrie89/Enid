@@ -499,6 +499,7 @@ export default function App() {
           .utility-row .segment-group { width: 100%; }
         }
         @media print {
+          .app-root { min-height: 0 !important; }
           .no-print { display: none !important; }
           .listPane { max-height: none !important; overflow: visible !important; width: 100% !important; max-width: 100% !important; border: none !important; }
           .split { flex-direction: column !important; max-width: 100% !important; }
