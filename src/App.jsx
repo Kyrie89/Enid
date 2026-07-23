@@ -47,10 +47,11 @@ export default function App() {
   const [editing, setEditing] = useState(null);
   const [connectPicker, setConnectPicker] = useState(false);
   const [toast, setToast] = useState("");
-  const [viewMode, setViewMode] = useState("browse"); // "browse" | "day" | "network" | "statewide"
+  const [viewMode, setViewMode] = useState("browse"); // "browse" | "day" | "network"
   const [selectedDay, setSelectedDay] = useState(DAYS[new Date().getDay()]);
   const [showClosed, setShowClosed] = useState(false);
   const [locationFilter, setLocationFilter] = useState("all");
+  const [scopeFilter, setScopeFilter] = useState("local"); // "local" | "regional" | "all"
   const [lang, setLang] = useState("en");
   const [showInsights, setShowInsights] = useState(false);
   const [showPrintOptions, setShowPrintOptions] = useState(false);
@@ -149,7 +150,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (audienceMode === "client" && (viewMode === "network" || viewMode === "statewide")) setViewMode("browse");
+    if (audienceMode === "client" && viewMode === "network") setViewMode("browse");
   }, [audienceMode, viewMode]);
 
   // Jump to the top when opening a detail/edit view so mobile doesn't land mid-scroll.
@@ -165,18 +166,22 @@ export default function App() {
     return [...set].sort();
   }, [resources]);
 
+  // Regional/national resources aren't tied to a city, so they ignore the location
+  // filter and always show up once their scope is included.
+  const inScope = useCallback((r) => (
+    scopeFilter === "local" ? !r.isStatewide : scopeFilter === "regional" ? r.isStatewide : true
+  ), [scopeFilter]);
+  const inLocation = useCallback((r) => (
+    r.isStatewide || locationFilter === "all" || r.city === locationFilter
+  ), [locationFilter]);
+
   const filtered = useMemo(() => {
     if (!resources) return [];
     const q = query.trim().toLowerCase();
     const catMatch = (r) => activeCat === "all" || r.category === activeCat || (r.secondaryCategories || []).includes(activeCat);
     const base = resources.filter((r) => {
       if (!showClosed && r.status === "closed") return false;
-      if (viewMode === "statewide") {
-        if (!r.isStatewide) return false;
-      } else {
-        if (r.isStatewide) return false;
-        if (locationFilter !== "all" && r.city !== locationFilter) return false;
-      }
+      if (!inScope(r) || !inLocation(r)) return false;
       if (!catMatch(r)) return false;
       if (issueFilters.length && !issueFilters.some((i) => r.issues?.includes(i))) return false;
       if (barrierFilters.length && !barrierFilters.some((b) => r.barriers?.includes(b))) return false;
@@ -203,7 +208,7 @@ export default function App() {
       .sort((a, b) => a.score - b.score)
       .map((x) => x.r);
     return fuzzy;
-  }, [resources, query, activeCat, issueFilters, barrierFilters, showClosed, viewMode, locationFilter]);
+  }, [resources, query, activeCat, issueFilters, barrierFilters, showClosed, inScope, inLocation]);
 
   const selected = resources?.find((r) => r.id === selectedId) || null;
   const activeFilterCount = issueFilters.length + barrierFilters.length;
@@ -544,7 +549,6 @@ export default function App() {
               <button role="tab" aria-selected={viewMode === "browse"} style={{ ...S.segmentBtn, ...(viewMode === "browse" ? S.segmentBtnActive : {}) }} onClick={() => setViewMode("browse")}>List</button>
               <button role="tab" aria-selected={viewMode === "day"} style={{ ...S.segmentBtn, ...(viewMode === "day" ? S.segmentBtnActive : {}) }} onClick={() => setViewMode("day")}><Clock size={12} /> By Day</button>
               <button role="tab" aria-selected={viewMode === "network"} style={{ ...S.segmentBtn, ...(viewMode === "network" ? S.segmentBtnActive : {}) }} onClick={() => setViewMode("network")}><Share2 size={12} /> Network</button>
-              <button role="tab" aria-selected={viewMode === "statewide"} style={{ ...S.segmentBtn, ...(viewMode === "statewide" ? S.segmentBtnActive : {}) }} onClick={() => setViewMode("statewide")}><Phone size={12} /> Regional & National</button>
             </div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               <button style={S.utilBtn} onClick={() => setShowInsights(true)} aria-label="View search insights"><BarChart3 size={14} /></button>
@@ -591,19 +595,6 @@ export default function App() {
               </button>
             ))}
           </div>
-        ) : viewMode === "statewide" ? (
-          <div style={S.searchRow}>
-            <div style={S.searchBox}>
-              <Search size={16} color="#6b7280" />
-              <input
-                style={S.searchInput}
-                placeholder="Search regional & national services, hotlines, and out-of-area connections..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-              {query && <button style={S.clearBtn} onClick={() => setQuery("")} aria-label="Clear search"><X size={14} /></button>}
-            </div>
-          </div>
         ) : (
           <>
             <div style={S.searchRow}>
@@ -611,7 +602,7 @@ export default function App() {
                 <Search size={16} color="#6b7280" />
                 <input
                   style={S.searchInput}
-                  placeholder="Search by name, insurance, issue, barrier..."
+                  placeholder={scopeFilter === "regional" ? "Search regional & national services, hotlines, and out-of-area connections..." : "Search by name, insurance, issue, barrier..."}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                 />
@@ -641,31 +632,40 @@ export default function App() {
               </div>
             )}
 
-            {cities.length > 1 && (
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
-                <label style={{ fontSize: 11, fontWeight: 700, color: "#9aa0a6", letterSpacing: 0.5 }}>LOCATION</label>
-                <select
-                  style={{ ...S.input, width: "auto", padding: "6px 10px", fontSize: 13 }}
-                  value={locationFilter}
-                  onChange={(e) => setLocationFilter(e.target.value)}
-                >
-                  <option value="all">All towns ({resources.filter((r) => !r.isStatewide).length})</option>
-                  {cities.map((c) => (
-                    <option key={c} value={c}>{c} ({resources.filter((r) => !r.isStatewide && r.city === c).length})</option>
-                  ))}
-                </select>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, flexWrap: "wrap", fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
+              <label style={{ fontSize: 11, fontWeight: 700, color: "#6b7178", letterSpacing: 0.5 }}>SCOPE</label>
+              <div style={S.segmentGroup} role="tablist" aria-label="Resource scope">
+                <button role="tab" aria-selected={scopeFilter === "local"} style={{ ...S.segmentBtn, ...(scopeFilter === "local" ? S.segmentBtnActive : {}) }} onClick={() => setScopeFilter("local")}>Local Only</button>
+                <button role="tab" aria-selected={scopeFilter === "regional"} style={{ ...S.segmentBtn, ...(scopeFilter === "regional" ? S.segmentBtnActive : {}) }} onClick={() => setScopeFilter("regional")}>Regional & National</button>
+                <button role="tab" aria-selected={scopeFilter === "all"} style={{ ...S.segmentBtn, ...(scopeFilter === "all" ? S.segmentBtnActive : {}) }} onClick={() => setScopeFilter("all")}>All Resources</button>
               </div>
-            )}
+
+              {scopeFilter !== "regional" && cities.length > 1 && (
+                <>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: "#6b7178", letterSpacing: 0.5, marginLeft: 8 }}>LOCATION</label>
+                  <select
+                    style={{ ...S.input, width: "auto", padding: "6px 10px", fontSize: 13 }}
+                    value={locationFilter}
+                    onChange={(e) => setLocationFilter(e.target.value)}
+                  >
+                    <option value="all">All towns ({resources.filter((r) => !r.isStatewide).length})</option>
+                    {cities.map((c) => (
+                      <option key={c} value={c}>{c} ({resources.filter((r) => !r.isStatewide && r.city === c).length})</option>
+                    ))}
+                  </select>
+                </>
+              )}
+            </div>
 
             <div style={S.chipRow}>
-              <CatChip active={activeCat === "all"} onClick={() => setActiveCat("all")} label="All" count={resources.filter((r) => (showClosed || r.status !== "closed") && !r.isStatewide && (locationFilter === "all" || r.city === locationFilter)).length} />
+              <CatChip active={activeCat === "all"} onClick={() => setActiveCat("all")} label="All" count={resources.filter((r) => (showClosed || r.status !== "closed") && inScope(r) && inLocation(r)).length} />
               {Object.entries(CATEGORY_META).map(([key, meta]) => (
                 <CatChip
                   key={key}
                   active={activeCat === key}
                   onClick={() => setActiveCat(key)}
                   label={meta.label}
-                  count={resources.filter((r) => (showClosed || r.status !== "closed") && !r.isStatewide && (locationFilter === "all" || r.city === locationFilter) && (r.category === key || (r.secondaryCategories || []).includes(key))).length}
+                  count={resources.filter((r) => (showClosed || r.status !== "closed") && inScope(r) && inLocation(r) && (r.category === key || (r.secondaryCategories || []).includes(key))).length}
                   color={meta.color}
                   Icon={meta.icon}
                 />
