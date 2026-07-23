@@ -8,6 +8,12 @@ import { CATEGORY_META, DAYS, DAY_SHORT } from "../lib/taxonomy";
 import { getVerificationInfo } from "../lib/utils";
 import { Field, InfoBlock, ConnectionRow } from "./shared";
 
+function formatAgeRange(min, max) {
+  if (min != null && max != null) return `Ages ${min}–${max}`;
+  if (min != null) return `Ages ${min}+`;
+  return `Ages up to ${max}`;
+}
+
 export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJump, audienceMode, showToast, canEdit, onPrint }) {
   const [confirmAction, setConfirmAction] = useState(null); // null | "close" | "delete"
   const confirmCancelRef = useRef(null);
@@ -16,6 +22,9 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
   const isClient = audienceMode === "client";
   const connected = resources.filter((r) => resource.connections.includes(r.id));
   const referredBy = resources.filter((r) => r.connections.includes(resource.id) && !resource.connections.includes(r.id));
+  const siblingPrograms = resource.parentOrg
+    ? resources.filter((r) => r.id !== resource.id && r.parentOrg?.trim().toLowerCase() === resource.parentOrg.trim().toLowerCase())
+    : [];
 
   const directionsUrl = resource.address
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(resource.address)}`
@@ -64,9 +73,15 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
                 REGIONAL / NATIONAL
               </span>
             )}
+            {resource.isCountywide && (
+              <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.3, color: "#4a5a8a", background: "#4a5a8a14", borderRadius: 10, padding: "2px 8px" }}>
+                COUNTYWIDE
+              </span>
+            )}
           </div>
           <h2 style={{ ...S.detailName, ...(isClient ? { fontSize: 24 } : {}) }}>{resource.name}</h2>
           <div style={S.detailSubtitle}>{resource.subcategory}</div>
+          {resource.parentOrg && <div style={S.detailSubtitle}>Part of {resource.parentOrg}</div>}
         </div>
       </div>
 
@@ -157,6 +172,9 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
       )}
 
       {resource.populations && <InfoBlock icon={Users} title="Population served" text={resource.populations} />}
+      {(resource.ageMin != null || resource.ageMax != null) && (
+        <InfoBlock icon={Users} title="Age range served" text={formatAgeRange(resource.ageMin, resource.ageMax)} />
+      )}
       {resource.exclusions && <InfoBlock icon={AlertTriangle} title="Won't work for" text={resource.exclusions} tone="warn" />}
       {resource.insurance && <InfoBlock icon={ShieldCheck} title="Insurance / cost" text={resource.insurance} />}
 
@@ -178,6 +196,15 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
       )}
 
       {resource.notes && <InfoBlock icon={Link2} title="Notes" text={resource.notes} />}
+
+      {siblingPrograms.length > 0 && (
+        <div style={{ marginTop: 18 }}>
+          <div style={S.sectionLabel}>OTHER PROGRAMS FROM {resource.parentOrg.toUpperCase()}</div>
+          {siblingPrograms.map((r) => (
+            <ConnectionRow key={r.id} resource={r} direction={r.subcategory || CATEGORY_META[r.category]?.label || ""} onClick={() => onJump(r.id)} />
+          ))}
+        </div>
+      )}
 
       {!isClient && (connected.length > 0 || referredBy.length > 0) && (
         <div style={{ marginTop: 18 }}>

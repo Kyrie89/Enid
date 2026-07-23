@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 
 import { supabase } from "./supabaseClient";
-import { CATEGORY_META, ISSUE_TAGS, BARRIER_TAGS, DAYS, DAY_SHORT } from "./lib/taxonomy";
+import { CATEGORY_META, ISSUE_TAG_GROUPS, BARRIER_TAGS, DAYS, DAY_SHORT } from "./lib/taxonomy";
 import { uid, findLikelyDuplicate, timeToMinutes, fuzzyScore } from "./lib/utils";
 import { S } from "./styles";
 
@@ -20,7 +20,7 @@ const emptyDraft = () => ({
   id: uid(), name: "", category: "treatment", secondaryCategories: [], subcategory: "", address: "", phone: "",
   website: "", populations: "", exclusions: "", insurance: "", notes: "", schedule: [], locations: [], issues: [], barriers: [],
   connections: [], verifiedDate: null, status: "active", editedBy: "", editedDate: null,
-  city: "", isStatewide: false,
+  city: "", isStatewide: false, isCountywide: false, ageMin: null, ageMax: null, parentOrg: "",
 });
 
 const PRINT_FIELD_OPTIONS = [
@@ -125,6 +125,10 @@ export default function App() {
       editedBy: r.edited_by,
       editedDate: r.edited_date,
       isStatewide: r.is_statewide,
+      isCountywide: r.is_countywide,
+      ageMin: r.age_min,
+      ageMax: r.age_max,
+      parentOrg: r.parent_org,
       schedule: scheduleData.filter((s) => s.resource_id === r.id),
       connections: connectionsData.filter((c) => c.resource_id === r.id).map((c) => c.connected_resource_id),
       locations: locationsData.filter((l) => l.resource_id === r.id),
@@ -162,17 +166,17 @@ export default function App() {
 
   const cities = useMemo(() => {
     if (!resources) return [];
-    const set = new Set(resources.filter((r) => !r.isStatewide && r.city).map((r) => r.city));
+    const set = new Set(resources.filter((r) => !r.isStatewide && !r.isCountywide && r.city).map((r) => r.city));
     return [...set].sort();
   }, [resources]);
 
-  // Regional/national resources aren't tied to a city, so they ignore the location
-  // filter and always show up once their scope is included.
+  // Regional/national and countywide resources aren't tied to one city, so they
+  // ignore the location filter and always show up once their scope is included.
   const inScope = useCallback((r) => (
     scopeFilter === "local" ? !r.isStatewide : scopeFilter === "regional" ? r.isStatewide : true
   ), [scopeFilter]);
   const inLocation = useCallback((r) => (
-    r.isStatewide || locationFilter === "all" || r.city === locationFilter
+    r.isStatewide || r.isCountywide || locationFilter === "all" || r.city === locationFilter
   ), [locationFilter]);
 
   const filtered = useMemo(() => {
@@ -294,7 +298,7 @@ export default function App() {
       }
     }
     const stamped = { ...editing, editedBy: editorDisplayName || "Unattributed", editedDate: new Date().toISOString().slice(0, 10) };
-    const { schedule, connections, locations, secondaryCategories, verifiedDate, editedBy, editedDate, isStatewide, ...rest } = stamped;
+    const { schedule, connections, locations, secondaryCategories, verifiedDate, editedBy, editedDate, isStatewide, isCountywide, ageMin, ageMax, parentOrg, ...rest } = stamped;
 
     const { error: resourceError } = await supabase.from("resources").upsert({
       ...rest,
@@ -303,6 +307,10 @@ export default function App() {
       edited_by: editedBy,
       edited_date: editedDate,
       is_statewide: isStatewide,
+      is_countywide: isCountywide,
+      age_min: ageMin,
+      age_max: ageMax,
+      parent_org: parentOrg,
     });
     if (resourceError) { showToast("Couldn't save — try again"); return; }
 
@@ -363,6 +371,10 @@ export default function App() {
       subcategory: r.subcategory || "",
       city: r.city || "",
       isStatewide: r.isStatewide ? "yes" : "",
+      isCountywide: r.isCountywide ? "yes" : "",
+      ageMin: r.ageMin ?? "",
+      ageMax: r.ageMax ?? "",
+      parentOrg: r.parentOrg || "",
       address: r.address || "",
       phone: r.phone || "",
       website: r.website || "",
@@ -408,6 +420,10 @@ export default function App() {
             subcategory: row.subcategory || "",
             city: row.city || "",
             isStatewide: (row.isStatewide || "").trim().toLowerCase() === "yes",
+            isCountywide: (row.isCountywide || "").trim().toLowerCase() === "yes",
+            ageMin: row.ageMin?.trim() ? Number(row.ageMin) : null,
+            ageMax: row.ageMax?.trim() ? Number(row.ageMax) : null,
+            parentOrg: row.parentOrg || "",
             address: row.address || "",
             phone: row.phone || "",
             website: row.website || "",
@@ -437,13 +453,17 @@ export default function App() {
           return;
         }
         for (const r of imported) {
-          const { schedule, locations, secondaryCategories, editedBy, editedDate, isStatewide, ...rest } = r;
+          const { schedule, locations, secondaryCategories, editedBy, editedDate, isStatewide, isCountywide, ageMin, ageMax, parentOrg, ...rest } = r;
           const { error } = await supabase.from("resources").insert({
             ...rest,
             secondary_categories: secondaryCategories,
             edited_by: editedBy,
             edited_date: editedDate,
             is_statewide: isStatewide,
+            is_countywide: isCountywide,
+            age_min: ageMin,
+            age_max: ageMax,
+            parent_org: parentOrg,
           });
           if (error) continue;
           if (schedule.length) {
@@ -675,11 +695,16 @@ export default function App() {
             {showFilters && (
               <div style={S.filterPanel}>
                 <div style={S.filterGroupLabel}><Tag size={12} /> ISSUE</div>
-                <div style={S.tagWrap}>
-                  {ISSUE_TAGS.map((t) => (
-                    <TagChip key={t} label={t} active={issueFilters.includes(t)} onClick={() => toggleFilter(issueFilters, setIssueFilters, t)} />
-                  ))}
-                </div>
+                {ISSUE_TAG_GROUPS.map((group) => (
+                  <div key={group.label} style={{ marginBottom: 8 }}>
+                    <div style={S.tagGroupLabel}>{group.label}</div>
+                    <div style={S.tagWrap}>
+                      {group.tags.map((t) => (
+                        <TagChip key={t} label={t} active={issueFilters.includes(t)} onClick={() => toggleFilter(issueFilters, setIssueFilters, t)} />
+                      ))}
+                    </div>
+                  </div>
+                ))}
                 <div style={{ ...S.filterGroupLabel, marginTop: 12 }}><Filter size={12} /> BARRIER IT ADDRESSES</div>
                 <div style={S.tagWrap}>
                   {BARRIER_TAGS.map((t) => (

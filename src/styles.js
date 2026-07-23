@@ -42,6 +42,7 @@ export const S = {
   filterPanel: { background: "#f8f7f3", borderTop: "1px solid #eceae4", padding: "14px 0 16px", fontFamily: "'Helvetica Neue', Arial, sans-serif" },
   filterGroupLabel: { display: "flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 700, color: "#6b7178", letterSpacing: 0.5, marginBottom: 8 },
   tagWrap: { display: "flex", flexWrap: "wrap", gap: 6 },
+  tagGroupLabel: { fontSize: 10.5, fontWeight: 700, color: "#a8632a", letterSpacing: 0.4, textTransform: "uppercase", marginBottom: 5, fontFamily: "'Helvetica Neue', Arial, sans-serif" },
   tagChip: { border: "1.5px solid", borderRadius: 16, padding: "5px 10px", fontSize: 12, fontWeight: 500, fontFamily: "'Helvetica Neue', Arial, sans-serif" },
   clearFiltersBtn: { marginTop: 12, background: "transparent", border: "none", color: "#a8632a", fontSize: 12.5, fontWeight: 600, padding: 0, fontFamily: "'Helvetica Neue', Arial, sans-serif" },
   saveViewRow: { display: "flex", gap: 8, marginTop: 14, paddingTop: 12, borderTop: "1px solid #eceae4" },

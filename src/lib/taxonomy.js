@@ -14,16 +14,26 @@ export const CATEGORY_META = {
   youth_community: { label: "Youth & Community", icon: Sparkles, color: "#c24f7a" },
 };
 
-export const ISSUE_TAGS = [
-  "Substance use", "Mental health", "Housing / rent", "Utilities", "Food",
-  "Clothing", "Domestic violence", "Sexual assault", "Legal / court",
-  "Employment", "Government benefits", "ID & documents", "Medical care",
-  "Transportation", "Childcare", "Crisis / emergency", "Sober living / recovery housing",
-  "Autism / developmental disability", "Youth activities", "Teen programs", "Summer / seasonal programs", "Veterans services",
-  "Senior / elderly services", "Disability services", "LGBTQ+", "Immigration status",
-  "Financial counseling / debt", "Pregnancy / maternal health", "Native American / tribal services",
-  "Grief / loss support", "Reentry / justice-involved", "Foster care / kinship care",
+// Grouped loosely along the lines of the AIRS/211 Taxonomy of Human Services
+// (the shared classification standard most 211 networks use), mainly so a
+// 30+ tag picker reads as sections instead of one flat wall of buttons.
+export const ISSUE_TAG_GROUPS = [
+  { label: "Basic Needs", tags: ["Housing / rent", "Utilities", "Food", "Clothing", "Transportation"] },
+  { label: "Health & Treatment", tags: ["Substance use", "Mental health", "Medical care", "Sober living / recovery housing", "Pregnancy / maternal health"] },
+  { label: "Safety & Crisis", tags: ["Domestic violence", "Sexual assault", "Crisis / emergency", "Grief / loss support"] },
+  { label: "Legal & Government", tags: ["Legal / court", "Government benefits", "ID & documents"] },
+  { label: "Work & Money", tags: ["Employment", "Financial counseling / debt"] },
+  { label: "Family & Youth", tags: ["Childcare", "Youth activities", "Teen programs", "Summer / seasonal programs", "Foster care / kinship care"] },
+  {
+    label: "Target Populations",
+    tags: [
+      "Autism / developmental disability", "Disability services", "Veterans services", "Senior / elderly services",
+      "LGBTQ+", "Immigration status", "Native American / tribal services", "Reentry / justice-involved",
+    ],
+  },
 ];
+
+export const ISSUE_TAGS = ISSUE_TAG_GROUPS.flatMap((g) => g.tags);
 
 export const BARRIER_TAGS = [
   "No insurance needed", "Medicaid accepted", "Sliding scale", "Free",

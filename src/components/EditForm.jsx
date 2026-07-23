@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { X, ShieldCheck, Link2 } from "lucide-react";
 import { S } from "../styles";
-import { CATEGORY_META, ISSUE_TAGS, BARRIER_TAGS } from "../lib/taxonomy";
+import { CATEGORY_META, ISSUE_TAG_GROUPS, BARRIER_TAGS } from "../lib/taxonomy";
 import { FormRow, TagChip } from "./shared";
 import { ScheduleEditor } from "./ScheduleEditor";
 import { LocationsEditor } from "./LocationsEditor";
@@ -81,6 +81,10 @@ export function EditForm({
         <input id="field-subcategory" style={S.input} value={draft.subcategory} onChange={set("subcategory")} placeholder="e.g. Outpatient IOP, food pantry, Al-Anon meeting" />
       </FormRow>
 
+      <FormRow label="Parent organization (optional — for orgs that run more than one program)" htmlFor="field-parent-org">
+        <input id="field-parent-org" style={S.input} value={draft.parentOrg || ""} onChange={set("parentOrg")} placeholder="e.g. YWCA of Enid" />
+      </FormRow>
+
       <FormRow label="Address" htmlFor="field-address"><input id="field-address" style={S.input} value={draft.address} onChange={set("address")} placeholder="Street, Enid, OK" /></FormRow>
 
       <div style={{ display: "flex", gap: 10 }}>
@@ -93,21 +97,65 @@ export function EditForm({
       </FormRow>
 
       <FormRow label="Scope">
-        <label style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13.5, color: "#3c4146", fontFamily: "'Helvetica Neue', Arial, sans-serif", lineHeight: 1.4 }}>
-          <input
-            type="checkbox"
-            style={{ marginTop: 3 }}
-            checked={!!draft.isStatewide}
-            onChange={(e) => setDraft({ ...draft, isStatewide: e.target.checked })}
-          />
-          This is a statewide hotline, national program, or out-of-area community connection rather than a specific local address — list it under the Regional & National tab instead of by city
-        </label>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button
+            type="button"
+            onClick={() => setDraft({ ...draft, isStatewide: false, isCountywide: false })}
+            style={{ ...S.catPick, borderColor: !draft.isStatewide && !draft.isCountywide ? "#2f6f5e" : "#e4e2dc", background: !draft.isStatewide && !draft.isCountywide ? "#2f6f5e14" : "#fff", color: !draft.isStatewide && !draft.isCountywide ? "#2f6f5e" : "#5c6066" }}
+          >
+            City-specific
+          </button>
+          <button
+            type="button"
+            onClick={() => setDraft({ ...draft, isStatewide: false, isCountywide: true })}
+            style={{ ...S.catPick, borderColor: draft.isCountywide ? "#4a5a8a" : "#e4e2dc", background: draft.isCountywide ? "#4a5a8a14" : "#fff", color: draft.isCountywide ? "#4a5a8a" : "#5c6066" }}
+          >
+            Countywide (all of Garfield County)
+          </button>
+          <button
+            type="button"
+            onClick={() => setDraft({ ...draft, isStatewide: true, isCountywide: false })}
+            style={{ ...S.catPick, borderColor: draft.isStatewide ? "#4a5a8a" : "#e4e2dc", background: draft.isStatewide ? "#4a5a8a14" : "#fff", color: draft.isStatewide ? "#4a5a8a" : "#5c6066" }}
+          >
+            Regional & National
+          </button>
+        </div>
+        <div style={{ fontSize: 12, color: "#6b7178", marginTop: 6, fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
+          {draft.isStatewide
+            ? "A statewide hotline, national program, or out-of-area connection — listed under Regional & National scope instead of by city."
+            : draft.isCountywide
+            ? "Serves all of Garfield County — shows up no matter which city is selected in the location filter."
+            : "Tied to the city/town entered above."}
+        </div>
       </FormRow>
 
       <LocationsEditor draft={draft} setDraft={setDraft} />
 
       <FormRow label="Population served" htmlFor="field-populations">
         <input id="field-populations" style={S.input} value={draft.populations} onChange={set("populations")} placeholder="e.g. adult men, adolescents, corrections-involved" />
+      </FormRow>
+
+      <FormRow label="Age range served (optional)">
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <input
+            type="number"
+            style={{ ...S.input, width: 90 }}
+            value={draft.ageMin ?? ""}
+            onChange={(e) => setDraft({ ...draft, ageMin: e.target.value === "" ? null : Number(e.target.value) })}
+            placeholder="Min"
+            min={0}
+          />
+          <span style={{ color: "#6b7178", fontSize: 13 }}>to</span>
+          <input
+            type="number"
+            style={{ ...S.input, width: 90 }}
+            value={draft.ageMax ?? ""}
+            onChange={(e) => setDraft({ ...draft, ageMax: e.target.value === "" ? null : Number(e.target.value) })}
+            placeholder="Max"
+            min={0}
+          />
+          <span style={{ color: "#6b7178", fontSize: 12.5 }}>Leave both blank if not age-restricted</span>
+        </div>
       </FormRow>
 
       <FormRow label="Won't work for / exclusions (saves a wasted referral)" htmlFor="field-exclusions">
@@ -121,11 +169,16 @@ export function EditForm({
       <ScheduleEditor draft={draft} setDraft={setDraft} />
 
       <FormRow label="Issues this addresses">
-        <div style={S.tagWrap}>
-          {ISSUE_TAGS.map((t) => (
-            <TagChip key={t} label={t} active={draft.issues?.includes(t)} onClick={() => toggleDraftTag("issues", t)} />
-          ))}
-        </div>
+        {ISSUE_TAG_GROUPS.map((group) => (
+          <div key={group.label} style={{ marginBottom: 10 }}>
+            <div style={S.tagGroupLabel}>{group.label}</div>
+            <div style={S.tagWrap}>
+              {group.tags.map((t) => (
+                <TagChip key={t} label={t} active={draft.issues?.includes(t)} onClick={() => toggleDraftTag("issues", t)} />
+              ))}
+            </div>
+          </div>
+        ))}
       </FormRow>
 
       <FormRow label="Barriers it removes">
