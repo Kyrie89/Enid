@@ -6,7 +6,7 @@ export const S = {
   headerContent: { maxWidth: 1000, margin: "0 auto", padding: "0 20px" },
   headerInner: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 14 },
   eyebrow: { fontFamily: "'Helvetica Neue', Arial, sans-serif", fontSize: 11, letterSpacing: 1, color: "#a8632a", fontWeight: 700, marginBottom: 4 },
-  h1: { fontSize: 20, margin: 0, lineHeight: 1.3, fontWeight: 600, maxWidth: 420 },
+  h1: { fontSize: 20, margin: 0, lineHeight: 1.3, fontWeight: 600 },
   addBtn: { display: "flex", alignItems: "center", gap: 6, background: "#2f6f5e", color: "#fff", border: "none", borderRadius: 8, padding: "9px 14px", fontSize: 13, fontFamily: "'Helvetica Neue', Arial, sans-serif", fontWeight: 600, flexShrink: 0 },
   utilityRow: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, fontFamily: "'Helvetica Neue', Arial, sans-serif" },
   segmentGroup: { display: "flex", background: "#f2f0ea", borderRadius: 8, padding: 3, gap: 2 },
