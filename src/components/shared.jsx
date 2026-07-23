@@ -66,10 +66,10 @@ export function ConnectionRow({ resource, direction, onClick }) {
   );
 }
 
-export function FormRow({ label, children, grow }) {
+export function FormRow({ label, children, grow, htmlFor }) {
   return (
     <div style={{ marginBottom: 14, flex: grow ? 1 : undefined }}>
-      <div style={S.formLabel}>{label}</div>
+      {htmlFor ? <label style={S.formLabel} htmlFor={htmlFor}>{label}</label> : <div style={S.formLabel}>{label}</div>}
       {children}
     </div>
   );

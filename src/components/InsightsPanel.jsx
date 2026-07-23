@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { S } from "../styles";
 import { getVerificationInfo } from "../lib/utils";
@@ -7,6 +7,9 @@ import { supabase } from "../supabaseClient";
 export function InsightsPanel({ onClose, resources }) {
   const [misses, setMisses] = useState(null);
   const [loading, setLoading] = useState(true);
+  const closeBtnRef = useRef(null);
+
+  useEffect(() => { closeBtnRef.current?.focus(); }, []);
 
   useEffect(() => {
     (async () => {
@@ -19,6 +22,12 @@ export function InsightsPanel({ onClose, resources }) {
       setLoading(false);
     })();
   }, []);
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
   const staleCount = resources.filter((r) => {
     const v = getVerificationInfo(r);
@@ -39,7 +48,7 @@ export function InsightsPanel({ onClose, resources }) {
       <div style={S.modalCard} onClick={(e) => e.stopPropagation()}>
         <div style={S.formHeader}>
           <h2 style={{ margin: 0, fontSize: 18 }}>Insights</h2>
-          <button style={S.iconBtn} onClick={onClose} aria-label="Close insights panel"><X size={16} /></button>
+          <button ref={closeBtnRef} style={S.iconBtn} onClick={onClose} aria-label="Close insights panel"><X size={16} /></button>
         </div>
 
         <div style={S.insightsGrid}>
