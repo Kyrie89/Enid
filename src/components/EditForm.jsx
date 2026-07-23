@@ -198,6 +198,10 @@ export function EditForm({
         <textarea id="field-notes" style={{ ...S.input, minHeight: 70, resize: "vertical" }} value={draft.notes} onChange={set("notes")} placeholder="Hours, referral process, anything staff should know" />
       </FormRow>
 
+      <FormRow label="Next step (optional — what should someone do first?)" htmlFor="field-next-step">
+        <input id="field-next-step" style={S.input} value={draft.nextStep || ""} onChange={set("nextStep")} placeholder="e.g. Call to schedule an intake appointment" />
+      </FormRow>
+
       <FormRow label="Verification">
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <button

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   MapPin, Phone, Globe, Clock, Users, AlertTriangle, ShieldCheck, Link2,
-  Edit3, Trash2, Copy, Navigation, X, Printer,
+  Edit3, Trash2, Copy, Navigation, X, Printer, ArrowRight,
 } from "lucide-react";
 import { S } from "../styles";
 import { CATEGORY_META, DAYS, DAY_SHORT, CLIENT_TAG_LABELS } from "../lib/taxonomy";
@@ -62,6 +62,7 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
     if (resource.schedule?.length) {
       lines.push("Hours: " + resource.schedule.map((s) => `${DAY_SHORT[s.day]} ${s.time}`).join(", "));
     }
+    if (resource.nextStep) lines.push("Next step: " + resource.nextStep);
     return lines.join("\n");
   };
 
@@ -133,6 +134,59 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
         );
       })()}
 
+      {/* What it provides */}
+      {resource.notes && <InfoBlock icon={Link2} title="What this provides" text={resource.notes} />}
+      {resource.issues?.length > 0 && (
+        <div style={{ marginBottom: 8 }}>
+          <div style={S.pillGroupLabel}>Addresses</div>
+          <div style={S.tagWrap}>{resource.issues.map((t) => <span key={t} style={S.pillIssue}>{isClient ? (CLIENT_TAG_LABELS[t] || t) : t}</span>)}</div>
+        </div>
+      )}
+
+      {/* Who qualifies */}
+      {resource.populations && <InfoBlock icon={Users} title={isClient ? "Who can use this service" : "Population served"} text={resource.populations} />}
+      {(resource.ageMin != null || resource.ageMax != null) && (
+        <InfoBlock icon={Users} title="Age range served" text={formatAgeRange(resource.ageMin, resource.ageMax)} />
+      )}
+
+      {/* Cost */}
+      {resource.insurance && <InfoBlock icon={ShieldCheck} title="Cost and insurance" text={resource.insurance} />}
+      {resource.barriers?.length > 0 && (
+        <div style={{ marginBottom: 8 }}>
+          <div style={S.pillGroupLabel}>{isClient ? "Important access needs" : "Removes barrier"}</div>
+          <div style={S.tagWrap}>{resource.barriers.map((t) => <span key={t} style={S.pillBarrier}>{isClient ? (CLIENT_TAG_LABELS[t] || t) : t}</span>)}</div>
+        </div>
+      )}
+
+      {/* When */}
+      {resource.schedule?.length > 0 && (
+        <div style={S.meetingBlock}>
+          <div style={S.infoBlockTitle}><Clock size={13} /> Weekly schedule</div>
+          {DAYS.map((d) => {
+            const occs = resource.schedule.filter((s) => s.day === d);
+            if (occs.length === 0) return null;
+            return (
+              <div key={d} style={S.scheduleDayRow}>
+                <div style={S.scheduleDayName}>{d}</div>
+                {occs.map((o) => (
+                  <div key={o.id} style={S.scheduleOcc}>
+                    <span style={{ fontWeight: 600 }}>{o.time}</span> — {o.label}
+                    {o.frequency && o.frequency !== "Weekly" && <span style={{ color: "#a8632a" }}> ({o.frequency})</span>}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* How to start */}
+      {resource.nextStep && <InfoBlock icon={ArrowRight} title="How to get started" text={resource.nextStep} tone="highlight" />}
+
+      {/* Eligibility limits */}
+      {resource.exclusions && <InfoBlock icon={AlertTriangle} title={isClient ? "Reasons someone may not qualify" : "Won't work for"} text={resource.exclusions} tone="warn" />}
+
+      {/* Contact */}
       <div style={S.fieldGrid}>
         {showAddress && <Field icon={MapPin} label="Address" value={resource.address} href={!isClient ? directionsUrl : null} external={!isClient} />}
         {isClient && isConfidential && resource.address && (
@@ -173,53 +227,6 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
           })}
         </div>
       )}
-
-      {resource.schedule?.length > 0 && (
-        <div style={S.meetingBlock}>
-          <div style={S.infoBlockTitle}><Clock size={13} /> Weekly schedule</div>
-          {DAYS.map((d) => {
-            const occs = resource.schedule.filter((s) => s.day === d);
-            if (occs.length === 0) return null;
-            return (
-              <div key={d} style={S.scheduleDayRow}>
-                <div style={S.scheduleDayName}>{d}</div>
-                {occs.map((o) => (
-                  <div key={o.id} style={S.scheduleOcc}>
-                    <span style={{ fontWeight: 600 }}>{o.time}</span> — {o.label}
-                    {o.frequency && o.frequency !== "Weekly" && <span style={{ color: "#a8632a" }}> ({o.frequency})</span>}
-                  </div>
-                ))}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {resource.populations && <InfoBlock icon={Users} title={isClient ? "Who can use this service" : "Population served"} text={resource.populations} />}
-      {(resource.ageMin != null || resource.ageMax != null) && (
-        <InfoBlock icon={Users} title="Age range served" text={formatAgeRange(resource.ageMin, resource.ageMax)} />
-      )}
-      {resource.exclusions && <InfoBlock icon={AlertTriangle} title={isClient ? "Reasons someone may not qualify" : "Won't work for"} text={resource.exclusions} tone="warn" />}
-      {resource.insurance && <InfoBlock icon={ShieldCheck} title="Cost and insurance" text={resource.insurance} />}
-
-      {(resource.issues?.length > 0 || resource.barriers?.length > 0) && (
-        <div style={{ marginTop: 14, borderTop: "1px solid #f0eee8", paddingTop: 12 }}>
-          {resource.issues?.length > 0 && (
-            <div style={{ marginBottom: 8 }}>
-              <div style={S.pillGroupLabel}>Addresses</div>
-              <div style={S.tagWrap}>{resource.issues.map((t) => <span key={t} style={S.pillIssue}>{isClient ? (CLIENT_TAG_LABELS[t] || t) : t}</span>)}</div>
-            </div>
-          )}
-          {resource.barriers?.length > 0 && (
-            <div>
-              <div style={S.pillGroupLabel}>{isClient ? "Important access needs" : "Removes barrier"}</div>
-              <div style={S.tagWrap}>{resource.barriers.map((t) => <span key={t} style={S.pillBarrier}>{isClient ? (CLIENT_TAG_LABELS[t] || t) : t}</span>)}</div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {resource.notes && <InfoBlock icon={Link2} title="Notes" text={resource.notes} />}
 
       {siblingPrograms.length > 0 && (
         <div style={{ marginTop: 18 }}>

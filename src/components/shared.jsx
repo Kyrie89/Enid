@@ -44,10 +44,10 @@ export function Field({ icon: Icon, label, value, href, external }) {
 }
 
 export function InfoBlock({ icon: Icon, title, text, tone }) {
-  const warn = tone === "warn";
+  const color = tone === "warn" ? "#b3413a" : tone === "highlight" ? "#2f6f5e" : S.infoBlockTitle.color;
   return (
     <div style={S.infoBlock}>
-      <div style={{ ...S.infoBlockTitle, color: warn ? "#b3413a" : S.infoBlockTitle.color }}><Icon size={13} /> {title}</div>
+      <div style={{ ...S.infoBlockTitle, color }}><Icon size={13} /> {title}</div>
       <div style={S.infoBlockText}>{text}</div>
     </div>
   );

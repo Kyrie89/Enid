@@ -8,7 +8,7 @@ import {
 
 import { supabase } from "./supabaseClient";
 import { CATEGORY_META, ISSUE_TAG_GROUPS, BARRIER_TAGS, QUICK_REQUIREMENT_TAGS, DAYS, DAY_SHORT } from "./lib/taxonomy";
-import { uid, findLikelyDuplicate, timeToMinutes, fuzzyScore, expandSearchQuery } from "./lib/utils";
+import { uid, findLikelyDuplicate, timeToMinutes, fuzzyScore, expandSearchQuery, getVerificationInfo } from "./lib/utils";
 import { SEARCH_SYNONYMS } from "./lib/searchSynonyms";
 import { S } from "./styles";
 
@@ -20,7 +20,7 @@ import { EditForm } from "./components/EditForm";
 
 const emptyDraft = () => ({
   id: uid(), name: "", category: "treatment", secondaryCategories: [], subcategory: "", address: "", phone: "",
-  website: "", populations: "", exclusions: "", insurance: "", notes: "", schedule: [], locations: [], issues: [], barriers: [],
+  website: "", populations: "", exclusions: "", insurance: "", notes: "", nextStep: "", schedule: [], locations: [], issues: [], barriers: [],
   connections: [], verifiedDate: null, status: "active", editedBy: "", editedDate: null,
   city: "", isStatewide: false, isCountywide: false, ageMin: null, ageMax: null, parentOrg: "",
 });
@@ -34,6 +34,7 @@ const PRINT_FIELD_OPTIONS = [
   { key: "issues", label: "Issues addressed" },
   { key: "barriers", label: "Barriers removed" },
   { key: "notes", label: "Notes" },
+  { key: "nextStep", label: "Next step" },
 ];
 
 const CLIENT_QUICK_NEEDS = [
@@ -76,7 +77,7 @@ export default function App() {
   const moreMenuRef = useRef(null);
   const [showPrintOptions, setShowPrintOptions] = useState(false);
   const [printSingleMode, setPrintSingleMode] = useState(false);
-  const [printFields, setPrintFields] = useState({ phone: true, address: true, website: false, insurance: false, populations: false, issues: false, barriers: false, notes: false });
+  const [printFields, setPrintFields] = useState({ phone: true, address: true, website: false, insurance: false, populations: false, issues: false, barriers: false, notes: false, nextStep: false });
   const [savedViews, setSavedViews] = useState([]);
   const [savingViewName, setSavingViewName] = useState("");
   const [audienceMode, setAudienceMode] = useState("staff"); // "staff" | "client"
@@ -154,6 +155,7 @@ export default function App() {
       ageMin: r.age_min,
       ageMax: r.age_max,
       parentOrg: r.parent_org,
+      nextStep: r.next_step,
       schedule: scheduleData.filter((s) => s.resource_id === r.id),
       connections: connectionsData.filter((c) => c.resource_id === r.id).map((c) => c.connected_resource_id),
       locations: locationsData.filter((l) => l.resource_id === r.id),
@@ -353,7 +355,7 @@ export default function App() {
       }
     }
     const stamped = { ...editing, editedBy: editorDisplayName || "Unattributed", editedDate: new Date().toISOString().slice(0, 10) };
-    const { schedule, connections, locations, secondaryCategories, verifiedDate, editedBy, editedDate, isStatewide, isCountywide, ageMin, ageMax, parentOrg, ...rest } = stamped;
+    const { schedule, connections, locations, secondaryCategories, verifiedDate, editedBy, editedDate, isStatewide, isCountywide, ageMin, ageMax, parentOrg, nextStep, ...rest } = stamped;
 
     const { error: resourceError } = await supabase.from("resources").upsert({
       ...rest,
@@ -366,6 +368,7 @@ export default function App() {
       age_min: ageMin,
       age_max: ageMax,
       parent_org: parentOrg,
+      next_step: nextStep || "",
     });
     if (resourceError) { showToast("Couldn't save — try again"); return; }
 
@@ -437,6 +440,7 @@ export default function App() {
       exclusions: r.exclusions || "",
       insurance: r.insurance || "",
       notes: r.notes || "",
+      nextStep: r.nextStep || "",
       issues: (r.issues || []).join(" | "),
       barriers: (r.barriers || []).join(" | "),
       connections: (r.connections || []).join(" | "),
@@ -487,6 +491,7 @@ export default function App() {
             exclusions: row.exclusions || "",
             insurance: row.insurance || "",
             notes: row.notes || "",
+            nextStep: row.nextStep || "",
             issues: splitList(row.issues),
             barriers: splitList(row.barriers),
             schedule: (row.schedule || "").split(";").map((s) => s.trim()).filter(Boolean).map((chunk) => {
@@ -509,7 +514,7 @@ export default function App() {
           return;
         }
         for (const r of imported) {
-          const { schedule, locations, secondaryCategories, editedBy, editedDate, isStatewide, isCountywide, ageMin, ageMax, parentOrg, ...rest } = r;
+          const { schedule, locations, secondaryCategories, editedBy, editedDate, isStatewide, isCountywide, ageMin, ageMax, parentOrg, nextStep, ...rest } = r;
           const { error } = await supabase.from("resources").insert({
             ...rest,
             secondary_categories: secondaryCategories,
@@ -520,6 +525,7 @@ export default function App() {
             age_min: ageMin,
             age_max: ageMax,
             parent_org: parentOrg,
+            next_step: nextStep,
           });
           if (error) continue;
           if (schedule.length) {
@@ -936,6 +942,19 @@ export default function App() {
                           ? [r.barriers?.includes("Free") ? "Free" : null, r.barriers?.includes("Confidential location") ? null : r.address || null].filter(Boolean).join(" · ") || meta.label
                           : (r.subcategory || meta.label)}
                       </div>
+                      {!isClient && (() => {
+                        const costLabel = r.barriers?.includes("Free") ? "Free" : r.barriers?.includes("Sliding scale") ? "Sliding scale" : r.barriers?.includes("Medicaid accepted") ? "Medicaid accepted" : null;
+                        const v = getVerificationInfo(r);
+                        const dotColor = v.level === "fresh" ? "#2f6f5e" : v.level === "stale" ? "#a8632a" : "#c2c6cc";
+                        const verifShort = v.level === "fresh" ? "Verified" : v.level === "stale" ? "Needs recheck" : "Not verified";
+                        return (
+                          <div className="no-print" style={S.listItemMeta}>
+                            {costLabel && <span style={S.costTag}>{costLabel}</span>}
+                            <span style={{ ...S.verifDot, background: dotColor }} />
+                            <span>{verifShort}</span>
+                          </div>
+                        );
+                      })()}
                       {!isClient && (
                         <div className="print-only" style={S.printDetails}>
                           {printFields.phone && r.phone && <div>{r.phone}</div>}
@@ -946,6 +965,7 @@ export default function App() {
                           {printFields.issues && r.issues?.length > 0 && <div>Addresses: {r.issues.join(", ")}</div>}
                           {printFields.barriers && r.barriers?.length > 0 && <div>Barriers removed: {r.barriers.join(", ")}</div>}
                           {printFields.notes && r.notes && <div>{r.notes}</div>}
+                          {printFields.nextStep && r.nextStep && <div>Next step: {r.nextStep}</div>}
                         </div>
                       )}
                     </div>
