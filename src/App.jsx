@@ -524,7 +524,7 @@ export default function App() {
             <h1 style={S.h1}>
               {audienceMode === "client"
                 ? (lang === "es" ? "¿Qué necesitas hoy?" : "What do you need today?")
-                : (lang === "es" ? "Encuentre quién ayuda, con qué, y a quién pueden ayudar gratis" : "Find who helps, with what, and who they're free to help")}
+                : (lang === "es" ? "Averigüe quién ayuda a quién, con qué, cuándo." : "Find out who helps who, with what, when.")}
             </h1>
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }} className="no-print">
