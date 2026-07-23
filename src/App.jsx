@@ -278,6 +278,11 @@ export default function App() {
 
   const selected = resources?.find((r) => r.id === selectedId) || null;
   const activeFilterCount = issueFilters.length + barrierFilters.length + (ageFilter !== "" ? 1 : 0);
+  // True when the open detail view no longer matches the current search/filters
+  // (e.g. filters changed while it was open) — surfaced so it doesn't look like
+  // a silent mismatch between the list and what's shown.
+  const outOfFilterScope = selected && viewMode === "browse" ? !filtered.some((r) => r.id === selected.id) : false;
+  const clearAllFilters = () => { setQuery(""); setActiveCat("all"); setIssueFilters([]); setBarrierFilters([]); setAgeFilter(""); };
 
   // Log searches that return zero results — surfaces demand gaps for the coalition.
   useEffect(() => {
@@ -561,9 +566,10 @@ export default function App() {
 
   if (loading) {
     return (
-      <div style={S.loadingWrap}>
+      <div style={S.loadingWrap} role="status" aria-live="polite">
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-        <div style={S.loadingSpin} />
+        <div style={S.loadingSpin} aria-hidden="true" />
+        <div style={{ marginTop: 12, fontSize: 13.5, color: "#6b7178", fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>Loading resources…</div>
       </div>
     );
   }
@@ -578,6 +584,8 @@ export default function App() {
         button:not(:disabled) { transition: filter 0.12s ease, background-color 0.12s ease; }
         button:not(:disabled):hover { filter: brightness(0.95); }
         a:hover { opacity: 0.82; }
+        button:focus-visible, a:focus-visible, [role="tab"]:focus-visible, [tabindex]:focus-visible { outline: 2px solid #2f6f5e; outline-offset: 2px; }
+        input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid #2f6f5e; outline-offset: 1px; }
         .listPane button:not([aria-current="true"]):hover { background-color: #f6f4ee !important; filter: none; }
         button[role="tab"][aria-selected="false"]:hover { background-color: rgba(255,255,255,0.65) !important; filter: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -909,6 +917,9 @@ export default function App() {
             <NetworkView resources={filtered} onSelect={(id) => { setSelectedId(id); setEditing(null); }} selectedId={selectedId} />
           ) : (
             <>
+              <div aria-live="polite" style={S.srOnly}>
+                {filtered.length} resource{filtered.length === 1 ? "" : "s"} found
+              </div>
               {filtered.length === 0 && (
                 <div style={S.emptyState}>
                   {audienceMode === "client"
@@ -927,7 +938,7 @@ export default function App() {
                 const Icon = meta.icon;
                 const isClient = audienceMode === "client";
                 return (
-                  <button
+                  <div
                     key={r.id}
                     className="print-item"
                     style={{
@@ -935,58 +946,62 @@ export default function App() {
                       ...(selectedId === r.id ? S.listItemActive : {}),
                       ...(isClient ? S.listItemClient : {}),
                     }}
-                    onClick={() => { setSelectedId(r.id); setEditing(null); }}
-                    aria-current={selectedId === r.id ? "true" : undefined}
                   >
-                    <div style={{ ...S.listIconWrap, ...(isClient ? { width: 40, height: 40 } : {}), background: meta.color + "1a", color: meta.color }}>
-                      <Icon size={isClient ? 19 : 16} />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ ...S.listItemName, ...(isClient ? { fontSize: 16 } : {}) }}>{r.name}</div>
-                      <div style={S.listItemSub}>
-                        {isClient
-                          ? [r.barriers?.includes("Free") ? "Free" : null, r.barriers?.includes("Confidential location") ? null : r.address || null].filter(Boolean).join(" · ") || meta.label
-                          : (r.subcategory || meta.label)}
+                    <button
+                      type="button"
+                      style={S.listItemMainBtn}
+                      onClick={() => { setSelectedId(r.id); setEditing(null); }}
+                      aria-current={selectedId === r.id ? "true" : undefined}
+                    >
+                      <div style={{ ...S.listIconWrap, ...(isClient ? { width: 40, height: 40 } : {}), background: meta.color + "1a", color: meta.color }}>
+                        <Icon size={isClient ? 19 : 16} />
                       </div>
-                      {!isClient && (() => {
-                        const costLabel = r.barriers?.includes("Free") ? "Free" : r.barriers?.includes("Sliding scale") ? "Sliding scale" : r.barriers?.includes("Medicaid accepted") ? "Medicaid accepted" : null;
-                        const v = getVerificationInfo(r);
-                        const dotColor = v.level === "fresh" ? "#2f6f5e" : v.level === "stale" ? "#a8632a" : "#c2c6cc";
-                        const verifShort = v.level === "fresh" ? "Recently confirmed" : v.level === "stale" ? "Needs confirming" : "Not yet verified";
-                        return (
-                          <div className="no-print" style={S.listItemMeta}>
-                            {costLabel && <span style={S.costTag}>{costLabel}</span>}
-                            <span style={{ ...S.verifDot, background: dotColor }} />
-                            <span>{verifShort}</span>
-                          </div>
-                        );
-                      })()}
-                      {!isClient && (
-                        <div className="print-only" style={S.printDetails}>
-                          {printFields.phone && r.phone && <div>{r.phone}</div>}
-                          {printFields.address && r.address && <div>{r.address}</div>}
-                          {printFields.website && r.website && <div>{r.website}</div>}
-                          {printFields.insurance && r.insurance && <div>{r.insurance}</div>}
-                          {printFields.populations && r.populations && <div>Serves: {r.populations}</div>}
-                          {printFields.issues && r.issues?.length > 0 && <div>Addresses: {r.issues.join(", ")}</div>}
-                          {printFields.barriers && r.barriers?.length > 0 && <div>Barriers removed: {r.barriers.join(", ")}</div>}
-                          {printFields.notes && r.notes && <div>{r.notes}</div>}
-                          {printFields.nextStep && r.nextStep && <div>Next step: {r.nextStep}</div>}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ ...S.listItemName, ...(isClient ? { fontSize: 16 } : {}) }}>{r.name}</div>
+                        <div style={S.listItemSub}>
+                          {isClient
+                            ? [r.barriers?.includes("Free") ? "Free" : null, r.barriers?.includes("Confidential location") ? null : r.address || null].filter(Boolean).join(" · ") || meta.label
+                            : (r.subcategory || meta.label)}
                         </div>
-                      )}
-                    </div>
+                        {!isClient && (() => {
+                          const costLabel = r.barriers?.includes("Free") ? "Free" : r.barriers?.includes("Sliding scale") ? "Sliding scale" : r.barriers?.includes("Medicaid accepted") ? "Medicaid accepted" : null;
+                          const v = getVerificationInfo(r);
+                          const dotColor = v.level === "fresh" ? "#2f6f5e" : v.level === "stale" ? "#a8632a" : "#c2c6cc";
+                          const verifShort = v.level === "fresh" ? "Recently confirmed" : v.level === "stale" ? "Needs confirming" : "Not yet verified";
+                          return (
+                            <div className="no-print" style={S.listItemMeta}>
+                              {costLabel && <span style={S.costTag}>{costLabel}</span>}
+                              <span style={{ ...S.verifDot, background: dotColor }} />
+                              <span>{verifShort}</span>
+                            </div>
+                          );
+                        })()}
+                        {!isClient && (
+                          <div className="print-only" style={S.printDetails}>
+                            {printFields.phone && r.phone && <div>{r.phone}</div>}
+                            {printFields.address && r.address && <div>{r.address}</div>}
+                            {printFields.website && r.website && <div>{r.website}</div>}
+                            {printFields.insurance && r.insurance && <div>{r.insurance}</div>}
+                            {printFields.populations && r.populations && <div>Serves: {r.populations}</div>}
+                            {printFields.issues && r.issues?.length > 0 && <div>Addresses: {r.issues.join(", ")}</div>}
+                            {printFields.barriers && r.barriers?.length > 0 && <div>Barriers removed: {r.barriers.join(", ")}</div>}
+                            {printFields.notes && r.notes && <div>{r.notes}</div>}
+                            {printFields.nextStep && r.nextStep && <div>Next step: {r.nextStep}</div>}
+                          </div>
+                        )}
+                      </div>
+                    </button>
                     {isClient && r.phone && (
                       <a
                         href={`tel:${r.phone.replace(/[^0-9+]/g, "")}`}
                         style={S.listCallBtn}
-                        onClick={(e) => e.stopPropagation()}
                         aria-label={`Call ${r.name}`}
                       >
                         <Phone size={16} />
                       </a>
                     )}
-                    <ChevronRight size={16} color="#c2c6cc" />
-                  </button>
+                    <ChevronRight size={16} color="#c2c6cc" style={{ flexShrink: 0 }} />
+                  </div>
                 );
               })}
             </>
@@ -1023,6 +1038,8 @@ export default function App() {
               showToast={showToast}
               canEdit={isEditor}
               onPrint={printResource}
+              outOfFilterScope={outOfFilterScope}
+              onClearFilters={clearAllFilters}
             />
           ) : (
             <div style={S.placeholder}>

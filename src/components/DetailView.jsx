@@ -15,7 +15,7 @@ function formatAgeRange(min, max) {
   return `Ages up to ${max}`;
 }
 
-export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJump, audienceMode, showToast, canEdit, onPrint }) {
+export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJump, audienceMode, showToast, canEdit, onPrint, outOfFilterScope, onClearFilters }) {
   const [confirmAction, setConfirmAction] = useState(null); // null | "close" | "delete"
   const [accuracyVote, setAccuracyVote] = useState(null); // null | "yes" | "no"
   const confirmCancelRef = useRef(null);
@@ -112,6 +112,18 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
             <a href={directionsUrl} target="_blank" rel="noreferrer" style={S.clientDirectionsBtn}>
               <Navigation size={18} /> Directions
             </a>
+          )}
+        </div>
+      )}
+
+      {outOfFilterScope && (
+        <div className="no-print" style={{ ...S.warnBanner, background: "#eef1f7", color: "#4a5a8a" }}>
+          <AlertTriangle size={14} />
+          <span>This resource no longer matches your current search or filters.</span>
+          {onClearFilters && (
+            <button type="button" onClick={onClearFilters} style={{ background: "transparent", border: "none", padding: 0, color: "inherit", fontWeight: 700, textDecoration: "underline", cursor: "pointer", fontSize: "inherit" }}>
+              Clear filters
+            </button>
           )}
         </div>
       )}
