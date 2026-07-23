@@ -20,6 +20,9 @@ export const ISSUE_TAGS = [
   "Employment", "Government benefits", "ID & documents", "Medical care",
   "Transportation", "Childcare", "Crisis / emergency", "Sober living / recovery housing",
   "Autism / developmental disability", "Youth activities", "Teen programs", "Summer / seasonal programs", "Veterans services",
+  "Senior / elderly services", "Disability services", "LGBTQ+", "Immigration status",
+  "Financial counseling / debt", "Pregnancy / maternal health", "Native American / tribal services",
+  "Grief / loss support", "Reentry / justice-involved", "Foster care / kinship care",
 ];
 
 export const BARRIER_TAGS = [
