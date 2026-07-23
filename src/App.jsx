@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import Papa from "papaparse";
 import {
   Search, Plus, X, Phone, Link2, ChevronRight, SlidersHorizontal, Tag, Filter,
-  Clock, Share2, BarChart3, Printer, Download, Upload, UserCog, ChevronLeft,
+  Clock, Share2, BarChart3, Printer, Download, Upload, UserCog, ChevronLeft, Users,
 } from "lucide-react";
 
 import { supabase } from "./supabaseClient";
@@ -42,6 +42,7 @@ export default function App() {
   const [activeCat, setActiveCat] = useState("all");
   const [issueFilters, setIssueFilters] = useState([]);
   const [barrierFilters, setBarrierFilters] = useState([]);
+  const [ageFilter, setAgeFilter] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [editing, setEditing] = useState(null);
@@ -178,6 +179,14 @@ export default function App() {
   const inLocation = useCallback((r) => (
     r.isStatewide || r.isCountywide || locationFilter === "all" || r.city === locationFilter
   ), [locationFilter]);
+  // A resource with no age_min/age_max set has no age restriction, so it always matches.
+  const inAge = useCallback((r) => {
+    if (ageFilter === "" || ageFilter == null) return true;
+    const age = Number(ageFilter);
+    if (r.ageMin != null && age < r.ageMin) return false;
+    if (r.ageMax != null && age > r.ageMax) return false;
+    return true;
+  }, [ageFilter]);
 
   const filtered = useMemo(() => {
     if (!resources) return [];
@@ -185,7 +194,7 @@ export default function App() {
     const catMatch = (r) => activeCat === "all" || r.category === activeCat || (r.secondaryCategories || []).includes(activeCat);
     const base = resources.filter((r) => {
       if (!showClosed && r.status === "closed") return false;
-      if (!inScope(r) || !inLocation(r)) return false;
+      if (!inScope(r) || !inLocation(r) || !inAge(r)) return false;
       if (!catMatch(r)) return false;
       if (issueFilters.length && !issueFilters.some((i) => r.issues?.includes(i))) return false;
       if (barrierFilters.length && !barrierFilters.some((b) => r.barriers?.includes(b))) return false;
@@ -212,10 +221,10 @@ export default function App() {
       .sort((a, b) => a.score - b.score)
       .map((x) => x.r);
     return fuzzy;
-  }, [resources, query, activeCat, issueFilters, barrierFilters, showClosed, inScope, inLocation]);
+  }, [resources, query, activeCat, issueFilters, barrierFilters, showClosed, inScope, inLocation, inAge]);
 
   const selected = resources?.find((r) => r.id === selectedId) || null;
-  const activeFilterCount = issueFilters.length + barrierFilters.length;
+  const activeFilterCount = issueFilters.length + barrierFilters.length + (ageFilter !== "" ? 1 : 0);
 
   // Log searches that return zero results — surfaces demand gaps for the coalition.
   useEffect(() => {
@@ -670,14 +679,14 @@ export default function App() {
             </div>
 
             <div style={S.chipRow}>
-              <CatChip active={activeCat === "all"} onClick={() => setActiveCat("all")} label="All" count={resources.filter((r) => (showClosed || r.status !== "closed") && inScope(r) && inLocation(r)).length} />
+              <CatChip active={activeCat === "all"} onClick={() => setActiveCat("all")} label="All" count={resources.filter((r) => (showClosed || r.status !== "closed") && inScope(r) && inLocation(r) && inAge(r)).length} />
               {Object.entries(CATEGORY_META).map(([key, meta]) => (
                 <CatChip
                   key={key}
                   active={activeCat === key}
                   onClick={() => setActiveCat(key)}
                   label={meta.label}
-                  count={resources.filter((r) => (showClosed || r.status !== "closed") && inScope(r) && inLocation(r) && (r.category === key || (r.secondaryCategories || []).includes(key))).length}
+                  count={resources.filter((r) => (showClosed || r.status !== "closed") && inScope(r) && inLocation(r) && inAge(r) && (r.category === key || (r.secondaryCategories || []).includes(key))).length}
                   color={meta.color}
                   Icon={meta.icon}
                 />
@@ -711,8 +720,17 @@ export default function App() {
                     <TagChip key={t} label={t} active={barrierFilters.includes(t)} onClick={() => toggleFilter(barrierFilters, setBarrierFilters, t)} />
                   ))}
                 </div>
+                <div style={{ ...S.filterGroupLabel, marginTop: 12 }}><Users size={12} /> CLIENT'S AGE</div>
+                <input
+                  type="number"
+                  min={0}
+                  style={{ ...S.input, width: 100 }}
+                  placeholder="Age"
+                  value={ageFilter}
+                  onChange={(e) => setAgeFilter(e.target.value)}
+                />
                 {activeFilterCount > 0 && (
-                  <button style={S.clearFiltersBtn} onClick={() => { setIssueFilters([]); setBarrierFilters([]); }}>
+                  <button style={S.clearFiltersBtn} onClick={() => { setIssueFilters([]); setBarrierFilters([]); setAgeFilter(""); }}>
                     Clear filters
                   </button>
                 )}
