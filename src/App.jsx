@@ -494,6 +494,7 @@ export default function App() {
           .no-print { display: none !important; }
           .listPane { max-height: none !important; overflow: visible !important; width: 100% !important; max-width: 100% !important; border: none !important; }
           .split { flex-direction: column !important; max-width: 100% !important; }
+          .detailPane { display: none !important; }
           .print-item { break-inside: avoid; border-bottom: 1px solid #ccc !important; padding: 10px 0 !important; }
           .print-only { display: block !important; }
         }
