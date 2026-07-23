@@ -136,7 +136,7 @@ export default function App() {
     if (selectedId || editing) {
       try { window.scrollTo({ top: 0, behavior: "instant" }); } catch (e) { window.scrollTo(0, 0); }
     }
-  }, [selectedId, editing]);
+  }, [selectedId, editing?.id]);
 
   const cities = useMemo(() => {
     if (!resources) return [];
