@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { X, ShieldCheck, Link2 } from "lucide-react";
 import { S } from "../styles";
 import { CATEGORY_META, ISSUE_TAGS, BARRIER_TAGS } from "../lib/taxonomy";
@@ -11,6 +11,7 @@ export function EditForm({
   connectPicker, setConnectPicker, toggleConnection, toggleDraftTag,
   editorDisplayName,
 }) {
+  const [nameError, setNameError] = useState(false);
   const set = (k) => (e) => setDraft({ ...draft, [k]: e.target.value });
   const others = resources.filter((r) => r.id !== draft.id);
   const secondary = draft.secondaryCategories || [];
@@ -34,7 +35,17 @@ export function EditForm({
         </div>
       </FormRow>
 
-      <FormRow label="Name *"><input style={S.input} value={draft.name} onChange={set("name")} placeholder="Organization name" /></FormRow>
+      <FormRow label="Name *" htmlFor="field-name">
+        <input
+          id="field-name"
+          style={{ ...S.input, ...(nameError ? { borderColor: "#b3413a" } : {}) }}
+          value={draft.name}
+          onChange={(e) => { setNameError(false); set("name")(e); }}
+          placeholder="Organization name"
+          aria-invalid={nameError || undefined}
+        />
+        {nameError && <div style={{ color: "#b3413a", fontSize: 12.5, marginTop: 4 }}>Name is required</div>}
+      </FormRow>
 
       <FormRow label="Category">
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -52,13 +63,13 @@ export function EditForm({
       </FormRow>
 
       <FormRow label="Also list under (optional — for resources that span categories)">
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, padding: 10, background: "#f8f7f3", borderRadius: 8 }}>
           {Object.entries(CATEGORY_META).filter(([key]) => key !== draft.category).map(([key, meta]) => (
             <button
               type="button"
               key={key}
               onClick={() => toggleSecondary(key)}
-              style={{ ...S.catPick, borderColor: secondary.includes(key) ? meta.color : "#e4e2dc", background: secondary.includes(key) ? meta.color + "14" : "#fff", color: secondary.includes(key) ? meta.color : "#5c6066" }}
+              style={{ ...S.catPick, padding: "5px 10px", fontSize: 11.5, borderColor: secondary.includes(key) ? meta.color : "#e4e2dc", background: secondary.includes(key) ? meta.color + "14" : "#fff", color: secondary.includes(key) ? meta.color : "#5c6066" }}
             >
               {meta.label}
             </button>
@@ -66,19 +77,19 @@ export function EditForm({
         </div>
       </FormRow>
 
-      <FormRow label="Subcategory / service type">
-        <input style={S.input} value={draft.subcategory} onChange={set("subcategory")} placeholder="e.g. Outpatient IOP, food pantry, Al-Anon meeting" />
+      <FormRow label="Subcategory / service type" htmlFor="field-subcategory">
+        <input id="field-subcategory" style={S.input} value={draft.subcategory} onChange={set("subcategory")} placeholder="e.g. Outpatient IOP, food pantry, Al-Anon meeting" />
       </FormRow>
 
-      <FormRow label="Address"><input style={S.input} value={draft.address} onChange={set("address")} placeholder="Street, Enid, OK" /></FormRow>
+      <FormRow label="Address" htmlFor="field-address"><input id="field-address" style={S.input} value={draft.address} onChange={set("address")} placeholder="Street, Enid, OK" /></FormRow>
 
       <div style={{ display: "flex", gap: 10 }}>
-        <FormRow label="Phone" grow><input style={S.input} value={draft.phone} onChange={set("phone")} placeholder="580-..." /></FormRow>
-        <FormRow label="Website" grow><input style={S.input} value={draft.website} onChange={set("website")} placeholder="https://" /></FormRow>
+        <FormRow label="Phone" grow htmlFor="field-phone"><input id="field-phone" style={S.input} value={draft.phone} onChange={set("phone")} placeholder="580-..." /></FormRow>
+        <FormRow label="Website" grow htmlFor="field-website"><input id="field-website" style={S.input} value={draft.website} onChange={set("website")} placeholder="https://" /></FormRow>
       </div>
 
-      <FormRow label="City / town (used for the location filter)">
-        <input style={S.input} value={draft.city || ""} onChange={set("city")} placeholder="e.g. Enid, Kingfisher" />
+      <FormRow label="City / town (used for the location filter)" htmlFor="field-city">
+        <input id="field-city" style={S.input} value={draft.city || ""} onChange={set("city")} placeholder="e.g. Enid, Kingfisher" />
       </FormRow>
 
       <FormRow label="Scope">
@@ -95,16 +106,16 @@ export function EditForm({
 
       <LocationsEditor draft={draft} setDraft={setDraft} />
 
-      <FormRow label="Population served">
-        <input style={S.input} value={draft.populations} onChange={set("populations")} placeholder="e.g. adult men, adolescents, corrections-involved" />
+      <FormRow label="Population served" htmlFor="field-populations">
+        <input id="field-populations" style={S.input} value={draft.populations} onChange={set("populations")} placeholder="e.g. adult men, adolescents, corrections-involved" />
       </FormRow>
 
-      <FormRow label="Won't work for / exclusions (saves a wasted referral)">
-        <input style={S.input} value={draft.exclusions || ""} onChange={set("exclusions")} placeholder="e.g. 18+ only, no active psychosis, no walk-ins" />
+      <FormRow label="Won't work for / exclusions (saves a wasted referral)" htmlFor="field-exclusions">
+        <input id="field-exclusions" style={S.input} value={draft.exclusions || ""} onChange={set("exclusions")} placeholder="e.g. 18+ only, no active psychosis, no walk-ins" />
       </FormRow>
 
-      <FormRow label="Insurance / cost">
-        <input style={S.input} value={draft.insurance} onChange={set("insurance")} placeholder="e.g. Medicaid, sliding scale, free" />
+      <FormRow label="Insurance / cost" htmlFor="field-insurance">
+        <input id="field-insurance" style={S.input} value={draft.insurance} onChange={set("insurance")} placeholder="e.g. Medicaid, sliding scale, free" />
       </FormRow>
 
       <ScheduleEditor draft={draft} setDraft={setDraft} />
@@ -125,8 +136,8 @@ export function EditForm({
         </div>
       </FormRow>
 
-      <FormRow label="Notes">
-        <textarea style={{ ...S.input, minHeight: 70, resize: "vertical" }} value={draft.notes} onChange={set("notes")} placeholder="Hours, referral process, anything staff should know" />
+      <FormRow label="Notes" htmlFor="field-notes">
+        <textarea id="field-notes" style={{ ...S.input, minHeight: 70, resize: "vertical" }} value={draft.notes} onChange={set("notes")} placeholder="Hours, referral process, anything staff should know" />
       </FormRow>
 
       <FormRow label="Verification">
@@ -184,7 +195,7 @@ export function EditForm({
       </FormRow>
 
       <div style={S.formActions}>
-        <button style={S.saveBtn} onClick={() => onSave()}>Save resource</button>
+        <button style={S.saveBtn} onClick={() => { if (!draft.name.trim()) { setNameError(true); return; } onSave(); }}>Save resource</button>
         <button style={S.cancelBtn} onClick={onCancel}>Cancel</button>
       </div>
     </div>
