@@ -47,7 +47,14 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
           <Icon size={20} />
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: meta.color, letterSpacing: 0.3 }}>{meta.label.toUpperCase()}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: meta.color, letterSpacing: 0.3 }}>{meta.label.toUpperCase()}</div>
+            {resource.isStatewide && (
+              <span style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.3, color: "#4a5a8a", background: "#4a5a8a14", borderRadius: 10, padding: "2px 8px" }}>
+                STATEWIDE / HOTLINE
+              </span>
+            )}
+          </div>
           <h2 style={{ ...S.detailName, ...(isClient ? { fontSize: 24 } : {}) }}>{resource.name}</h2>
           <div style={S.detailSubtitle}>{resource.subcategory}</div>
         </div>
