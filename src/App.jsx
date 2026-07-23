@@ -470,6 +470,8 @@ export default function App() {
           .split.has-detail .listPane { display: none !important; }
           .split.has-detail .mobile-back { display: flex !important; }
           .split.has-detail .detailPane { max-height: none !important; }
+          .utility-row { flex-wrap: wrap; row-gap: 10px; }
+          .utility-row .segment-group { width: 100%; }
         }
         @media print {
           .no-print { display: none !important; }
@@ -513,8 +515,8 @@ export default function App() {
         )}
 
         {audienceMode === "staff" && (
-          <div style={S.utilityRow} className="no-print">
-            <div style={S.segmentGroup} role="tablist" aria-label="View mode">
+          <div style={S.utilityRow} className="no-print utility-row">
+            <div style={S.segmentGroup} className="segment-group" role="tablist" aria-label="View mode">
               <button role="tab" aria-selected={viewMode === "browse"} style={{ ...S.segmentBtn, ...(viewMode === "browse" ? S.segmentBtnActive : {}) }} onClick={() => setViewMode("browse")}>List</button>
               <button role="tab" aria-selected={viewMode === "day"} style={{ ...S.segmentBtn, ...(viewMode === "day" ? S.segmentBtnActive : {}) }} onClick={() => setViewMode("day")}><Clock size={12} /> By Day</button>
               <button role="tab" aria-selected={viewMode === "network"} style={{ ...S.segmentBtn, ...(viewMode === "network" ? S.segmentBtnActive : {}) }} onClick={() => setViewMode("network")}><Share2 size={12} /> Network</button>
@@ -542,7 +544,7 @@ export default function App() {
         )}
 
         {audienceMode === "client" && (
-          <div style={S.utilityRow} className="no-print">
+          <div style={S.utilityRow} className="no-print utility-row">
             <div />
             <button style={S.utilBtn} onClick={() => setLang(lang === "en" ? "es" : "en")} aria-label="Toggle language">{lang === "en" ? "ES" : "EN"}</button>
           </div>
