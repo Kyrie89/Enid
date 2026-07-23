@@ -21,6 +21,7 @@ const emptyDraft = () => ({
   id: uid(), name: "", category: "treatment", secondaryCategories: [], subcategory: "", address: "", phone: "",
   website: "", populations: "", exclusions: "", insurance: "", notes: "", schedule: [], locations: [], issues: [], barriers: [],
   connections: [], verifiedDate: null, status: "active", editedBy: "", editedDate: null,
+  city: "", isStatewide: false,
 });
 
 /* ---------------- app ---------------- */
@@ -36,9 +37,10 @@ export default function App() {
   const [editing, setEditing] = useState(null);
   const [connectPicker, setConnectPicker] = useState(false);
   const [toast, setToast] = useState("");
-  const [viewMode, setViewMode] = useState("browse"); // "browse" | "day" | "network"
+  const [viewMode, setViewMode] = useState("browse"); // "browse" | "day" | "network" | "statewide"
   const [selectedDay, setSelectedDay] = useState(DAYS[new Date().getDay()]);
   const [showClosed, setShowClosed] = useState(false);
+  const [locationFilter, setLocationFilter] = useState("all");
   const [lang, setLang] = useState("en");
   const [showInsights, setShowInsights] = useState(false);
   const [savedViews, setSavedViews] = useState([]);
@@ -101,6 +103,7 @@ export default function App() {
       verifiedDate: r.verified_date,
       editedBy: r.edited_by,
       editedDate: r.edited_date,
+      isStatewide: r.is_statewide,
       schedule: scheduleData.filter((s) => s.resource_id === r.id),
       connections: connectionsData.filter((c) => c.resource_id === r.id).map((c) => c.connected_resource_id),
       locations: locationsData.filter((l) => l.resource_id === r.id),
@@ -126,7 +129,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (audienceMode === "client" && viewMode === "network") setViewMode("browse");
+    if (audienceMode === "client" && (viewMode === "network" || viewMode === "statewide")) setViewMode("browse");
   }, [audienceMode, viewMode]);
 
   // Jump to the top when opening a detail/edit view so mobile doesn't land mid-scroll.
@@ -136,12 +139,24 @@ export default function App() {
     }
   }, [selectedId, editing]);
 
+  const cities = useMemo(() => {
+    if (!resources) return [];
+    const set = new Set(resources.filter((r) => !r.isStatewide && r.city).map((r) => r.city));
+    return [...set].sort();
+  }, [resources]);
+
   const filtered = useMemo(() => {
     if (!resources) return [];
     const q = query.trim().toLowerCase();
     const catMatch = (r) => activeCat === "all" || r.category === activeCat || (r.secondaryCategories || []).includes(activeCat);
     const base = resources.filter((r) => {
       if (!showClosed && r.status === "closed") return false;
+      if (viewMode === "statewide") {
+        if (!r.isStatewide) return false;
+      } else {
+        if (r.isStatewide) return false;
+        if (locationFilter !== "all" && r.city !== locationFilter) return false;
+      }
       if (!catMatch(r)) return false;
       if (issueFilters.length && !issueFilters.some((i) => r.issues?.includes(i))) return false;
       if (barrierFilters.length && !barrierFilters.some((b) => r.barriers?.includes(b))) return false;
@@ -168,7 +183,7 @@ export default function App() {
       .sort((a, b) => a.score - b.score)
       .map((x) => x.r);
     return fuzzy;
-  }, [resources, query, activeCat, issueFilters, barrierFilters, showClosed]);
+  }, [resources, query, activeCat, issueFilters, barrierFilters, showClosed, viewMode, locationFilter]);
 
   const selected = resources?.find((r) => r.id === selectedId) || null;
   const activeFilterCount = issueFilters.length + barrierFilters.length;
@@ -193,6 +208,7 @@ export default function App() {
     if (!resources) return [];
     const list = [];
     resources.forEach((r) => {
+      if (r.isStatewide) return;
       (r.schedule || []).forEach((occ) => {
         if (occ.day === selectedDay) list.push({ ...occ, resource: r });
       });
@@ -253,7 +269,7 @@ export default function App() {
       }
     }
     const stamped = { ...editing, editedBy: editorDisplayName || "Unattributed", editedDate: new Date().toISOString().slice(0, 10) };
-    const { schedule, connections, locations, secondaryCategories, verifiedDate, editedBy, editedDate, ...rest } = stamped;
+    const { schedule, connections, locations, secondaryCategories, verifiedDate, editedBy, editedDate, isStatewide, ...rest } = stamped;
 
     const { error: resourceError } = await supabase.from("resources").upsert({
       ...rest,
@@ -261,6 +277,7 @@ export default function App() {
       verified_date: verifiedDate,
       edited_by: editedBy,
       edited_date: editedDate,
+      is_statewide: isStatewide,
     });
     if (resourceError) { showToast("Couldn't save — try again"); return; }
 
@@ -319,6 +336,8 @@ export default function App() {
       category: r.category,
       secondaryCategories: (r.secondaryCategories || []).join(" | "),
       subcategory: r.subcategory || "",
+      city: r.city || "",
+      isStatewide: r.isStatewide ? "yes" : "",
       address: r.address || "",
       phone: r.phone || "",
       website: r.website || "",
@@ -362,6 +381,8 @@ export default function App() {
             category: CATEGORY_META[row.category] ? row.category : "housing",
             secondaryCategories: splitList(row.secondaryCategories),
             subcategory: row.subcategory || "",
+            city: row.city || "",
+            isStatewide: (row.isStatewide || "").trim().toLowerCase() === "yes",
             address: row.address || "",
             phone: row.phone || "",
             website: row.website || "",
@@ -391,12 +412,13 @@ export default function App() {
           return;
         }
         for (const r of imported) {
-          const { schedule, locations, secondaryCategories, editedBy, editedDate, ...rest } = r;
+          const { schedule, locations, secondaryCategories, editedBy, editedDate, isStatewide, ...rest } = r;
           const { error } = await supabase.from("resources").insert({
             ...rest,
             secondary_categories: secondaryCategories,
             edited_by: editedBy,
             edited_date: editedDate,
+            is_statewide: isStatewide,
           });
           if (error) continue;
           if (schedule.length) {
@@ -495,6 +517,7 @@ export default function App() {
               <button role="tab" aria-selected={viewMode === "browse"} style={{ ...S.segmentBtn, ...(viewMode === "browse" ? S.segmentBtnActive : {}) }} onClick={() => setViewMode("browse")}>List</button>
               <button role="tab" aria-selected={viewMode === "day"} style={{ ...S.segmentBtn, ...(viewMode === "day" ? S.segmentBtnActive : {}) }} onClick={() => setViewMode("day")}><Clock size={12} /> By Day</button>
               <button role="tab" aria-selected={viewMode === "network"} style={{ ...S.segmentBtn, ...(viewMode === "network" ? S.segmentBtnActive : {}) }} onClick={() => setViewMode("network")}><Share2 size={12} /> Network</button>
+              <button role="tab" aria-selected={viewMode === "statewide"} style={{ ...S.segmentBtn, ...(viewMode === "statewide" ? S.segmentBtnActive : {}) }} onClick={() => setViewMode("statewide")}><Phone size={12} /> Statewide</button>
             </div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               <button style={S.utilBtn} onClick={() => setShowInsights(true)} aria-label="View search insights"><BarChart3 size={14} /></button>
@@ -541,6 +564,19 @@ export default function App() {
               </button>
             ))}
           </div>
+        ) : viewMode === "statewide" ? (
+          <div style={S.searchRow}>
+            <div style={S.searchBox}>
+              <Search size={16} color="#6b7280" />
+              <input
+                style={S.searchInput}
+                placeholder="Search statewide services & hotlines..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              {query && <button style={S.clearBtn} onClick={() => setQuery("")} aria-label="Clear search"><X size={14} /></button>}
+            </div>
+          </div>
         ) : (
           <>
             <div style={S.searchRow}>
@@ -578,15 +614,31 @@ export default function App() {
               </div>
             )}
 
+            {cities.length > 1 && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
+                <label style={{ fontSize: 11, fontWeight: 700, color: "#9aa0a6", letterSpacing: 0.5 }}>LOCATION</label>
+                <select
+                  style={{ ...S.input, width: "auto", padding: "6px 10px", fontSize: 13 }}
+                  value={locationFilter}
+                  onChange={(e) => setLocationFilter(e.target.value)}
+                >
+                  <option value="all">All towns ({resources.filter((r) => !r.isStatewide).length})</option>
+                  {cities.map((c) => (
+                    <option key={c} value={c}>{c} ({resources.filter((r) => !r.isStatewide && r.city === c).length})</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div style={S.chipRow}>
-              <CatChip active={activeCat === "all"} onClick={() => setActiveCat("all")} label="All" count={resources.filter((r) => showClosed || r.status !== "closed").length} />
+              <CatChip active={activeCat === "all"} onClick={() => setActiveCat("all")} label="All" count={resources.filter((r) => (showClosed || r.status !== "closed") && !r.isStatewide && (locationFilter === "all" || r.city === locationFilter)).length} />
               {Object.entries(CATEGORY_META).map(([key, meta]) => (
                 <CatChip
                   key={key}
                   active={activeCat === key}
                   onClick={() => setActiveCat(key)}
                   label={meta.label}
-                  count={resources.filter((r) => (showClosed || r.status !== "closed") && (r.category === key || (r.secondaryCategories || []).includes(key))).length}
+                  count={resources.filter((r) => (showClosed || r.status !== "closed") && !r.isStatewide && (locationFilter === "all" || r.city === locationFilter) && (r.category === key || (r.secondaryCategories || []).includes(key))).length}
                   color={meta.color}
                   Icon={meta.icon}
                 />
