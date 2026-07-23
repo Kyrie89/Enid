@@ -41,6 +41,11 @@ export function InsightsPanel({ onClose, resources }) {
     })();
   }, [resources]);
 
+  const clearFlags = async (resourceId) => {
+    setFlagged((prev) => prev.filter((f) => f.resource.id !== resourceId));
+    await supabase.from("accuracy_reports").delete().eq("resource_id", resourceId).eq("is_accurate", false);
+  };
+
   useEffect(() => {
     const onKey = (e) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
@@ -95,7 +100,17 @@ export function InsightsPanel({ onClose, resources }) {
               {flagged.map(({ resource, count }) => (
                 <div key={resource.id} style={S.missRow}>
                   <span style={{ fontWeight: 600 }}>{resource.name}</span>
-                  <span style={{ color: "#b3413a" }}>{count} report{count === 1 ? "" : "s"}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ color: "#b3413a" }}>{count} report{count === 1 ? "" : "s"}</span>
+                    <button
+                      style={{ ...S.iconBtn, minWidth: 22, height: 22, padding: 0 }}
+                      onClick={() => clearFlags(resource.id)}
+                      aria-label={`Clear outdated flags for ${resource.name}`}
+                      title="Clear — I've handled this"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
