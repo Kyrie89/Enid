@@ -269,8 +269,10 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
         ) : (
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <span style={{ fontSize: 13, color: "#5c6066", fontWeight: 600 }}>Is this information still accurate?</span>
-            <button type="button" onClick={() => submitAccuracyVote(true)} style={{ ...S.catPick, borderColor: "#2f6f5e", color: "#2f6f5e", background: "#fff" }}>Yes</button>
-            <button type="button" onClick={() => submitAccuracyVote(false)} style={{ ...S.catPick, borderColor: "#b3413a", color: "#b3413a", background: "#fff" }}>No</button>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button type="button" onClick={() => submitAccuracyVote(true)} style={{ ...S.catPick, borderColor: "#2f6f5e", color: "#2f6f5e", background: "#fff" }}>Yes</button>
+              <button type="button" onClick={() => submitAccuracyVote(false)} style={{ ...S.catPick, borderColor: "#b3413a", color: "#b3413a", background: "#fff" }}>No</button>
+            </div>
           </div>
         )}
       </div>
