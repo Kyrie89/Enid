@@ -780,6 +780,29 @@ export default function App() {
               </div>
             )}
 
+            <div style={S.categoryRow}>
+              <CatChip active={activeCat === "all"} onClick={() => setActiveCat("all")} label="All" count={categoryCounts.all} />
+              {Object.entries(CATEGORY_META).map(([key, meta]) => (
+                <CatChip
+                  key={key}
+                  active={activeCat === key}
+                  onClick={() => setActiveCat(key)}
+                  label={meta.label}
+                  count={categoryCounts.byKey[key] || 0}
+                  color={meta.color}
+                  Icon={meta.icon}
+                />
+              ))}
+              {categoryCounts.closedTotal > 0 && (
+                <button
+                  onClick={() => setShowClosed(!showClosed)}
+                  style={{ ...S.chip, borderColor: showClosed ? "#b3413a" : "#e4e2dc", background: showClosed ? "#b3413a14" : "#fff", color: showClosed ? "#b3413a" : "#5c6066" }}
+                >
+                  {showClosed ? "Hide closed" : "Show closed"} <span style={{ opacity: 0.6, marginLeft: 5 }}>{categoryCounts.closedTotal}</span>
+                </button>
+              )}
+            </div>
+
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, flexWrap: "wrap", fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
               <label style={{ fontSize: 11, fontWeight: 700, color: "#6b7178", letterSpacing: 0.5 }}>SCOPE</label>
               <div style={S.segmentGroup} role="tablist" aria-label="Resource scope">
@@ -802,29 +825,6 @@ export default function App() {
                     ))}
                   </select>
                 </>
-              )}
-            </div>
-
-            <div style={S.categoryRow}>
-              <CatChip active={activeCat === "all"} onClick={() => setActiveCat("all")} label="All" count={categoryCounts.all} />
-              {Object.entries(CATEGORY_META).map(([key, meta]) => (
-                <CatChip
-                  key={key}
-                  active={activeCat === key}
-                  onClick={() => setActiveCat(key)}
-                  label={meta.label}
-                  count={categoryCounts.byKey[key] || 0}
-                  color={meta.color}
-                  Icon={meta.icon}
-                />
-              ))}
-              {categoryCounts.closedTotal > 0 && (
-                <button
-                  onClick={() => setShowClosed(!showClosed)}
-                  style={{ ...S.chip, borderColor: showClosed ? "#b3413a" : "#e4e2dc", background: showClosed ? "#b3413a14" : "#fff", color: showClosed ? "#b3413a" : "#5c6066" }}
-                >
-                  {showClosed ? "Hide closed" : "Show closed"} <span style={{ opacity: 0.6, marginLeft: 5 }}>{categoryCounts.closedTotal}</span>
-                </button>
               )}
             </div>
 
