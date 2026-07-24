@@ -598,6 +598,7 @@ export default function App() {
           .split.has-detail .detailPane { max-height: none !important; }
           .utility-row { flex-wrap: wrap; row-gap: 10px; }
           .utility-row .segment-group { width: 100%; }
+          .utility-row > div:last-child { margin-left: auto; }
         }
         @media print {
           .app-root { min-height: 0 !important; }
