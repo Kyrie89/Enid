@@ -45,10 +45,11 @@ export const BARRIER_TAGS = [
 
 // Small curated subset of BARRIER_TAGS surfaced as an always-visible
 // "Important requirements" quick-filter row, so the most commonly-needed
-// access questions don't require opening More Filters.
+// access questions don't require opening More Filters. Kept short (one
+// row on a phone) on purpose — the full list, including these four, is
+// always still one tap away under More Filters.
 export const QUICK_REQUIREMENT_TAGS = [
-  "Free", "Medicaid accepted", "No ID required", "Transportation provided",
-  "Wheelchair accessible", "Interpreter available", "Criminal record OK", "24/7 availability",
+  "Free", "Medicaid accepted", "Wheelchair accessible", "24/7 availability",
 ];
 
 // Friendlier phrasing for a handful of tags that read as professional/clinical
