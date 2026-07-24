@@ -919,6 +919,12 @@ export default function App() {
                   </button>
                 );
               })}
+              {dayOccurrences.length > 0 && (
+                <div style={S.dayFooterNote}>
+                  Showing only resources with weekly hours recorded for {selectedDay} — most resources don't have this filled in yet.{" "}
+                  <button type="button" onClick={() => setViewMode("browse")} style={S.dayFooterLink}>Browse the full list</button> to see everything.
+                </div>
+              )}
             </>
           ) : viewMode === "network" ? (
             <NetworkView resources={filtered} onSelect={(id) => { setSelectedId(id); setEditing(null); }} selectedId={selectedId} />

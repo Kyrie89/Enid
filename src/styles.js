@@ -65,6 +65,8 @@ export const S = {
   split: { display: "flex", maxWidth: 1000, margin: "0 auto" },
   listPane: { width: "38%", maxWidth: 360, borderRight: "1px solid #e9e7e1", maxHeight: "calc(100vh - 150px)", overflowY: "auto" },
   emptyState: { padding: 24, fontSize: 13.5, color: "#6b7178", fontFamily: "'Helvetica Neue', Arial, sans-serif", lineHeight: 1.5 },
+  dayFooterNote: { padding: "16px", fontSize: 12.5, color: "#6b7178", fontFamily: "'Helvetica Neue', Arial, sans-serif", lineHeight: 1.5, borderTop: "1px solid #f0eee8" },
+  dayFooterLink: { background: "transparent", border: "none", padding: 0, color: "#2f6f5e", fontWeight: 600, textDecoration: "underline", cursor: "pointer", fontSize: "inherit", fontFamily: "inherit" },
   searchNotice: { padding: "10px 16px", fontSize: 12.5, color: "#a8632a", background: "#fbf1e6", fontFamily: "'Helvetica Neue', Arial, sans-serif" },
   listItem: { display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", background: "transparent", border: "none", borderBottom: "1px solid #f0eee8", padding: "12px 16px", fontFamily: "'Helvetica Neue', Arial, sans-serif" },
   listItemMainBtn: { display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0, background: "transparent", border: "none", padding: 0, margin: 0, textAlign: "left", font: "inherit", color: "inherit", cursor: "pointer" },
