@@ -17,15 +17,16 @@ function formatAgeRange(min, max) {
 
 export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJump, audienceMode, showToast, canEdit, onPrint, outOfFilterScope, onClearFilters }) {
   const [confirmAction, setConfirmAction] = useState(null); // null | "close" | "delete"
-  const [accuracyVote, setAccuracyVote] = useState(null); // null | "yes" | "no"
+  const [accuracyVote, setAccuracyVote] = useState(null); // null | "yes" | "no_pending" | "no"
+  const [accuracyNote, setAccuracyNote] = useState("");
   const confirmCancelRef = useRef(null);
 
-  useEffect(() => { setAccuracyVote(null); }, [resource.id]);
+  useEffect(() => { setAccuracyVote(null); setAccuracyNote(""); }, [resource.id]);
 
-  const submitAccuracyVote = async (isAccurate) => {
+  const submitAccuracyVote = async (isAccurate, note = "") => {
     setAccuracyVote(isAccurate ? "yes" : "no");
     await supabase.from("accuracy_reports").insert({
-      resource_id: resource.id, is_accurate: isAccurate, source: audienceMode,
+      resource_id: resource.id, is_accurate: isAccurate, source: audienceMode, note: note.trim() || null,
     });
   };
   const meta = CATEGORY_META[resource.category];
@@ -262,16 +263,31 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
       )}
 
       <div className="no-print" style={{ marginTop: 16, padding: "10px 12px", background: "#f8f7f3", borderRadius: 8, fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
-        {accuracyVote ? (
+        {accuracyVote === "yes" || accuracyVote === "no" ? (
           <div style={{ fontSize: 13, color: "#2f6f5e", fontWeight: 600 }}>
             {accuracyVote === "yes" ? "Thanks for confirming!" : "Thanks — we'll get this checked."}
+          </div>
+        ) : accuracyVote === "no_pending" ? (
+          <div>
+            <div style={{ fontSize: 13, color: "#5c6066", fontWeight: 600, marginBottom: 8 }}>What's wrong or out of date? (optional)</div>
+            <textarea
+              style={{ ...S.input, minHeight: 60, resize: "vertical", marginBottom: 8 }}
+              value={accuracyNote}
+              onChange={(e) => setAccuracyNote(e.target.value)}
+              placeholder="e.g. phone number changed, no longer offers this service"
+              autoFocus
+            />
+            <div style={{ display: "flex", gap: 10 }}>
+              <button type="button" onClick={() => submitAccuracyVote(false, accuracyNote)} style={{ ...S.catPick, borderColor: "#b3413a", color: "#b3413a", background: "#fff" }}>Submit</button>
+              <button type="button" onClick={() => setAccuracyVote(null)} style={{ ...S.catPick, borderColor: "#e4e2dc", color: "#5c6066", background: "#fff" }}>Cancel</button>
+            </div>
           </div>
         ) : (
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <span style={{ fontSize: 13, color: "#5c6066", fontWeight: 600 }}>Is this information still accurate?</span>
             <div style={{ display: "flex", gap: 10 }}>
               <button type="button" onClick={() => submitAccuracyVote(true)} style={{ ...S.catPick, borderColor: "#2f6f5e", color: "#2f6f5e", background: "#fff" }}>Yes</button>
-              <button type="button" onClick={() => submitAccuracyVote(false)} style={{ ...S.catPick, borderColor: "#b3413a", color: "#b3413a", background: "#fff" }}>No</button>
+              <button type="button" onClick={() => setAccuracyVote("no_pending")} style={{ ...S.catPick, borderColor: "#b3413a", color: "#b3413a", background: "#fff" }}>No</button>
             </div>
           </div>
         )}

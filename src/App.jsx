@@ -63,7 +63,9 @@ export default function App() {
   const [ageFilter, setAgeFilter] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const filterPanelRef = useRef(null);
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedId, setSelectedId] = useState(() => {
+    try { return new URLSearchParams(window.location.search).get("resource") || null; } catch { return null; }
+  });
   const [editing, setEditing] = useState(null);
   const [connectPicker, setConnectPicker] = useState(false);
   const [toast, setToast] = useState("");
@@ -80,7 +82,14 @@ export default function App() {
   const [printFields, setPrintFields] = useState({ phone: true, address: true, website: false, insurance: false, populations: false, issues: false, barriers: false, notes: false, nextStep: false });
   const [savedViews, setSavedViews] = useState([]);
   const [savingViewName, setSavingViewName] = useState("");
-  const [audienceMode, setAudienceMode] = useState("staff"); // "staff" | "client"
+  // A shared ?resource= link is meant for someone outside the coalition (an org
+  // verifying their own listing) — default them to the read-only Client View
+  // instead of Staff view, which exposes Edit/Delete with no real access control.
+  const [audienceMode, setAudienceMode] = useState(() => {
+    try {
+      return new URLSearchParams(window.location.search).get("resource") ? "client" : "staff";
+    } catch { return "staff"; }
+  });
   const fileInputRef = useRef(null);
 
   const isEditor = true; // TEMP: auth disabled while populating content — restore real access control before real launch
@@ -158,6 +167,15 @@ export default function App() {
   useEffect(() => {
     if (audienceMode === "client" && viewMode === "network") setViewMode("browse");
   }, [audienceMode, viewMode]);
+
+  // Keep the URL in sync so whatever's open can be copied and shared directly.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (selectedId) params.set("resource", selectedId);
+    else params.delete("resource");
+    const search = params.toString();
+    window.history.replaceState(null, "", window.location.pathname + (search ? `?${search}` : ""));
+  }, [selectedId]);
 
   // Jump to the top when opening a detail/edit view so mobile doesn't land mid-scroll.
   useEffect(() => {

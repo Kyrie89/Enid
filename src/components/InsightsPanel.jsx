@@ -28,13 +28,17 @@ export function InsightsPanel({ onClose, resources }) {
     (async () => {
       const { data, error } = await supabase
         .from("accuracy_reports")
-        .select("resource_id")
+        .select("resource_id, note")
         .eq("is_accurate", false);
       if (error) { setFlagged([]); return; }
-      const counts = {};
-      data.forEach(({ resource_id }) => { counts[resource_id] = (counts[resource_id] || 0) + 1; });
-      const byResource = Object.entries(counts)
-        .map(([id, count]) => ({ resource: resources.find((r) => r.id === id), count }))
+      const byId = {};
+      data.forEach(({ resource_id, note }) => {
+        if (!byId[resource_id]) byId[resource_id] = { count: 0, notes: [] };
+        byId[resource_id].count++;
+        if (note) byId[resource_id].notes.push(note);
+      });
+      const byResource = Object.entries(byId)
+        .map(([id, { count, notes }]) => ({ resource: resources.find((r) => r.id === id), count, notes }))
         .filter((x) => x.resource)
         .sort((a, b) => b.count - a.count);
       setFlagged(byResource);
@@ -97,20 +101,29 @@ export function InsightsPanel({ onClose, resources }) {
           <>
             <div style={S.sectionLabel}>FLAGGED AS OUTDATED</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 16 }}>
-              {flagged.map(({ resource, count }) => (
-                <div key={resource.id} style={S.missRow}>
-                  <span style={{ fontWeight: 600 }}>{resource.name}</span>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ color: "#b3413a" }}>{count} report{count === 1 ? "" : "s"}</span>
-                    <button
-                      style={{ ...S.iconBtn, minWidth: 22, height: 22, padding: 0 }}
-                      onClick={() => clearFlags(resource.id)}
-                      aria-label={`Clear outdated flags for ${resource.name}`}
-                      title="Clear — I've handled this"
-                    >
-                      <X size={12} />
-                    </button>
+              {flagged.map(({ resource, count, notes }) => (
+                <div key={resource.id} style={{ background: "#faf9f6", borderRadius: 6, padding: "6px 10px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+                    <span style={{ fontWeight: 600 }}>{resource.name}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ color: "#b3413a" }}>{count} report{count === 1 ? "" : "s"}</span>
+                      <button
+                        style={{ ...S.iconBtn, minWidth: 22, height: 22, padding: 0 }}
+                        onClick={() => clearFlags(resource.id)}
+                        aria-label={`Clear outdated flags for ${resource.name}`}
+                        title="Clear — I've handled this"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
                   </div>
+                  {notes.length > 0 && (
+                    <div style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 2 }}>
+                      {notes.map((n, i) => (
+                        <div key={i} style={{ fontSize: 12, color: "#6b7178", fontStyle: "italic" }}>"{n}"</div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
