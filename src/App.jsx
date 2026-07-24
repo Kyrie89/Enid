@@ -62,6 +62,7 @@ export default function App() {
   const [barrierFilters, setBarrierFilters] = useState([]);
   const [ageFilter, setAgeFilter] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const filterPanelRef = useRef(null);
   const [selectedId, setSelectedId] = useState(null);
   const [editing, setEditing] = useState(null);
   const [connectPicker, setConnectPicker] = useState(false);
@@ -199,6 +200,12 @@ export default function App() {
     document.addEventListener("keydown", onKey);
     return () => { document.removeEventListener("mousedown", onClick); document.removeEventListener("keydown", onKey); };
   }, [showMoreMenu]);
+
+  // The panel renders below the category/quick-requirement rows, which can be well
+  // off-screen on mobile — without this, opening it produces no visible change.
+  useEffect(() => {
+    if (showFilters) filterPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [showFilters]);
 
   const cities = useMemo(() => {
     if (!resources) return [];
@@ -831,7 +838,7 @@ export default function App() {
             </div>
 
             {showFilters && (
-              <div style={S.filterPanel}>
+              <div style={S.filterPanel} ref={filterPanelRef}>
                 <div style={S.filterHint}>Selecting more than one option below matches resources with any of them, not only ones with all of them.</div>
                 <div style={{ ...S.filterGroupLabel, marginTop: 12 }}><Tag size={12} /> ISSUE</div>
                 {ISSUE_TAG_GROUPS.map((group) => (
