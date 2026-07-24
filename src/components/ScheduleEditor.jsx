@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { X, Plus } from "lucide-react";
 import { S } from "../styles";
 import { DAYS, DAY_SHORT } from "../lib/taxonomy";
-import { uid } from "../lib/utils";
+import { uid, timeToMinutes } from "../lib/utils";
 import { FormRow } from "./shared";
 
 export function ScheduleEditor({ draft, setDraft }) {
@@ -51,7 +51,7 @@ export function ScheduleEditor({ draft, setDraft }) {
         </div>
       )}
 
-      <div style={{ fontSize: 11.5, fontWeight: 700, color: "#9aa0a6", marginBottom: 6, letterSpacing: 0.3 }}>
+      <div style={{ fontSize: 11.5, fontWeight: 700, color: "#6b7178", marginBottom: 6, letterSpacing: 0.3 }}>
         DAYS (pick one or more)
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
@@ -72,6 +72,11 @@ export function ScheduleEditor({ draft, setDraft }) {
         <input style={{ ...S.input, flex: "0 0 110px" }} placeholder="Time (e.g. 9:00 AM)" value={time} onChange={(e) => setTime(e.target.value)} />
         <input style={{ ...S.input, flex: 1 }} placeholder="What's available (e.g. Food pantry)" value={label} onChange={(e) => setLabel(e.target.value)} />
       </div>
+      {time.trim() && timeToMinutes(time) === 9999 && (
+        <div style={{ color: "#a8632a", fontSize: 12.5, marginTop: 6 }}>
+          Couldn't recognize this as a time (try a format like "9:00 AM") — it'll still save, but will sort to the end of the By Day list instead of in order.
+        </div>
+      )}
       <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
         <input style={{ ...S.input, flex: 1 }} placeholder="Frequency (default Weekly)" value={frequency} onChange={(e) => setFrequency(e.target.value)} />
         <button style={S.connectPickerBtn} onClick={addOccurrence}><Plus size={13} /> Add{days.length > 1 ? ` (${days.length} days)` : ""}</button>

@@ -29,7 +29,7 @@ const PRINT_FIELD_OPTIONS = [
   { key: "phone", label: "Phone" },
   { key: "address", label: "Address" },
   { key: "website", label: "Website" },
-  { key: "insurance", label: "Insurance / cost" },
+  { key: "insurance", label: "Cost and insurance" },
   { key: "populations", label: "Population served" },
   { key: "issues", label: "Issues addressed" },
   { key: "barriers", label: "Barriers removed" },
@@ -72,7 +72,6 @@ export default function App() {
   const [showClosed, setShowClosed] = useState(false);
   const [locationFilter, setLocationFilter] = useState("all");
   const [scopeFilter, setScopeFilter] = useState("local"); // "local" | "regional" | "all"
-  const lang = "en"; // TEMP: language toggle removed since resource content itself doesn't translate
   const [showInsights, setShowInsights] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const moreMenuRef = useRef(null);
@@ -82,17 +81,15 @@ export default function App() {
   const [savedViews, setSavedViews] = useState([]);
   const [savingViewName, setSavingViewName] = useState("");
   const [audienceMode, setAudienceMode] = useState("staff"); // "staff" | "client"
-  const [session, setSession] = useState(null);
-  const [editorProfile, setEditorProfile] = useState(null);
   const fileInputRef = useRef(null);
 
-  const isEditor = true; // TEMP: auth disabled while populating content — restore !!editorProfile before real launch
-  // With sign-in removed, editorProfile.display_name is dead — nothing sets a session
-  // anymore, so every edit was silently attributed "Unattributed" with no way to fix it.
-  // A remembered local name restores real attribution without needing auth back.
+  const isEditor = true; // TEMP: auth disabled while populating content — restore real access control before real launch
+  // With sign-in removed there's no session to attribute edits to, so every edit was
+  // silently "Unattributed" with no way to fix it. A remembered local name restores
+  // real attribution without needing auth back.
   const [editorName, setEditorName] = useState(() => { try { return localStorage.getItem("enid_editor_name") || ""; } catch { return ""; } });
   useEffect(() => { try { localStorage.setItem("enid_editor_name", editorName); } catch {} }, [editorName]);
-  const editorDisplayName = editorName.trim() || editorProfile?.display_name || "";
+  const editorDisplayName = editorName.trim();
 
   const showToast = useCallback((msg) => {
     setToast(msg);
@@ -105,28 +102,6 @@ export default function App() {
     window.addEventListener("afterprint", reset, { once: true });
     requestAnimationFrame(() => window.print());
   }, []);
-
-  /* ---- auth ---- */
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession);
-    });
-    return () => listener.subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (!session) {
-      setEditorProfile(null);
-      return;
-    }
-    let ignore = false;
-    (async () => {
-      const { data } = await supabase.from("editors").select("*").eq("id", session.user.id).maybeSingle();
-      if (!ignore) setEditorProfile(data || null);
-    })();
-    return () => { ignore = true; };
-  }, [session]);
 
   /* ---- resources / schedule / connections / locations ---- */
   const fetchResources = useCallback(async () => {
@@ -170,8 +145,7 @@ export default function App() {
       await fetchResources();
       setLoading(false);
     })();
-    // Refetch when auth identity changes — closed-resource visibility depends on it (see schema.sql).
-  }, [session?.user?.id, fetchResources]);
+  }, [fetchResources]);
 
   /* ---- saved views ---- */
   useEffect(() => {
@@ -236,6 +210,25 @@ export default function App() {
     return true;
   }, [ageFilter]);
 
+  // Single pass instead of one resources.filter() call per category chip.
+  const categoryCounts = useMemo(() => {
+    if (!resources) return { all: 0, byKey: {}, closedTotal: 0 };
+    const byKey = {};
+    let all = 0;
+    let closedTotal = 0;
+    for (const r of resources) {
+      if (r.status === "closed") closedTotal++;
+      if (!showClosed && r.status === "closed") continue;
+      if (!inScope(r) || !inLocation(r) || !inAge(r)) continue;
+      all++;
+      byKey[r.category] = (byKey[r.category] || 0) + 1;
+      for (const sec of r.secondaryCategories || []) {
+        byKey[sec] = (byKey[sec] || 0) + 1;
+      }
+    }
+    return { all, byKey, closedTotal };
+  }, [resources, showClosed, inScope, inLocation, inAge]);
+
   const { list: filtered, kind: searchMatchKind } = useMemo(() => {
     if (!resources) return { list: [], kind: null };
     const q = query.trim().toLowerCase();
@@ -252,7 +245,7 @@ export default function App() {
 
     const hayOf = (r) =>
       [
-        r.name, r.subcategory, r.address, r.populations, r.insurance, r.notes,
+        r.name, r.subcategory, r.address, r.populations, r.insurance, r.notes, r.exclusions,
         ...(r.issues || []), ...(r.barriers || []),
         ...(r.locations || []).flatMap((l) => [l.label, l.address]),
       ]
@@ -331,6 +324,7 @@ export default function App() {
       .from("saved_views")
       .insert({
         name, query, active_category: activeCat, issue_filters: issueFilters, barrier_filters: barrierFilters,
+        age_filter: ageFilter === "" ? null : Number(ageFilter),
         created_by: editorDisplayName,
       })
       .select()
@@ -346,6 +340,7 @@ export default function App() {
     setActiveCat(view.active_category || "all");
     setIssueFilters(view.issue_filters || []);
     setBarrierFilters(view.barrier_filters || []);
+    setAgeFilter(view.age_filter != null ? String(view.age_filter) : "");
     setViewMode("browse");
   };
 
@@ -586,7 +581,7 @@ export default function App() {
       <style>{`
         * { box-sizing: border-box; }
         input, textarea, select { font-family: inherit; }
-        ::placeholder { color: #9aa0a6; }
+        ::placeholder { color: #6b7178; }
         button { cursor: pointer; }
         button:not(:disabled) { transition: filter 0.12s ease, background-color 0.12s ease; }
         button:not(:disabled):hover { filter: brightness(0.95); }
@@ -624,11 +619,9 @@ export default function App() {
       <div style={S.headerContent}>
         <div style={S.headerInner}>
           <div>
-            <div style={S.eyebrow}>{audienceMode === "client" ? (lang === "es" ? "ENID, OK · OBTENER AYUDA" : "ENID, OK · GET HELP") : "ENID, OK · RESOURCE NETWORK"}</div>
+            <div style={S.eyebrow}>{audienceMode === "client" ? "ENID, OK · GET HELP" : "ENID, OK · RESOURCE NETWORK"}</div>
             <h1 style={S.h1}>
-              {audienceMode === "client"
-                ? (lang === "es" ? "¿Qué necesitas hoy?" : "What do you need today?")
-                : (lang === "es" ? "Averigüe quién ayuda a quién, con qué, cuándo." : "Find out who helps who, with what, when.")}
+              {audienceMode === "client" ? "What do you need today?" : "Find out who helps who, with what, when."}
             </h1>
             {audienceMode === "client" && (
               <div style={S.clientSubhead}>Choose a need below, or describe what you're looking for.</div>
@@ -637,7 +630,7 @@ export default function App() {
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }} className="no-print">
             {audienceMode === "staff" && isEditor && (
               <button style={S.addBtn} onClick={() => { setEditing(emptyDraft()); setSelectedId(null); }} aria-label="Add a new resource">
-                <Plus size={16} /> {lang === "es" ? "Añadir" : "Add"}
+                <Plus size={16} /> Add
               </button>
             )}
             <button
@@ -712,7 +705,13 @@ export default function App() {
                 <Search size={16} color="#6b7280" />
                 <input
                   style={S.searchInput}
-                  placeholder={scopeFilter === "regional" ? "Search regional & national services, hotlines, and out-of-area connections..." : "Search by name, insurance, issue, barrier..."}
+                  placeholder={
+                    scopeFilter === "regional"
+                      ? "Search regional & national services, hotlines, and out-of-area connections..."
+                      : audienceMode === "client"
+                      ? "Search by name or what you need..."
+                      : "Search by name, insurance, issue, barrier..."
+                  }
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                 />
@@ -807,24 +806,24 @@ export default function App() {
             </div>
 
             <div style={S.categoryRow}>
-              <CatChip active={activeCat === "all"} onClick={() => setActiveCat("all")} label="All" count={resources.filter((r) => (showClosed || r.status !== "closed") && inScope(r) && inLocation(r) && inAge(r)).length} />
+              <CatChip active={activeCat === "all"} onClick={() => setActiveCat("all")} label="All" count={categoryCounts.all} />
               {Object.entries(CATEGORY_META).map(([key, meta]) => (
                 <CatChip
                   key={key}
                   active={activeCat === key}
                   onClick={() => setActiveCat(key)}
                   label={meta.label}
-                  count={resources.filter((r) => (showClosed || r.status !== "closed") && inScope(r) && inLocation(r) && inAge(r) && (r.category === key || (r.secondaryCategories || []).includes(key))).length}
+                  count={categoryCounts.byKey[key] || 0}
                   color={meta.color}
                   Icon={meta.icon}
                 />
               ))}
-              {resources.some((r) => r.status === "closed") && (
+              {categoryCounts.closedTotal > 0 && (
                 <button
                   onClick={() => setShowClosed(!showClosed)}
                   style={{ ...S.chip, borderColor: showClosed ? "#b3413a" : "#e4e2dc", background: showClosed ? "#b3413a14" : "#fff", color: showClosed ? "#b3413a" : "#5c6066" }}
                 >
-                  {showClosed ? "Hide closed" : "Show closed"} <span style={{ opacity: 0.6, marginLeft: 5 }}>{resources.filter((r) => r.status === "closed").length}</span>
+                  {showClosed ? "Hide closed" : "Show closed"} <span style={{ opacity: 0.6, marginLeft: 5 }}>{categoryCounts.closedTotal}</span>
                 </button>
               )}
             </div>
@@ -858,12 +857,13 @@ export default function App() {
                     <TagChip key={t} label={t} active={barrierFilters.includes(t)} onClick={() => toggleFilter(barrierFilters, setBarrierFilters, t)} />
                   ))}
                 </div>
-                <div style={{ ...S.filterGroupLabel, marginTop: 12 }}><Users size={12} /> CLIENT'S AGE</div>
+                <div style={{ ...S.filterGroupLabel, marginTop: 12 }} id="age-filter-label"><Users size={12} /> CLIENT'S AGE</div>
                 <input
                   type="number"
                   min={0}
                   style={{ ...S.input, width: 100 }}
                   placeholder="Age"
+                  aria-labelledby="age-filter-label"
                   value={ageFilter}
                   onChange={(e) => setAgeFilter(e.target.value)}
                 />
@@ -1030,7 +1030,7 @@ export default function App() {
               onClick={() => { setSelectedId(null); setEditing(null); }}
               aria-label="Back to list"
             >
-              <ChevronLeft size={16} /> {audienceMode === "client" && lang === "es" ? "Volver a la lista" : audienceMode === "client" ? "Back to list" : "Back"}
+              <ChevronLeft size={16} /> {audienceMode === "client" ? "Back to list" : "Back"}
             </button>
           )}
           {editing ? (
@@ -1060,7 +1060,7 @@ export default function App() {
               <Link2 size={28} color="#c2c6cc" />
               <div style={{ marginTop: 10, color: "#8a9099", fontSize: 14, textAlign: "center", maxWidth: 260 }}>
                 {audienceMode === "client"
-                  ? (lang === "es" ? "Toca algo de la lista para ver el teléfono, la dirección y los horarios." : "Tap something in the list to see phone, address, and hours.")
+                  ? "Tap something in the list to see phone, address, and hours."
                   : "Pick a resource, or filter by issue and barrier to narrow things down."}
               </div>
             </div>

@@ -148,6 +148,7 @@ export function EditForm({
             value={draft.ageMin ?? ""}
             onChange={(e) => setDraft({ ...draft, ageMin: e.target.value === "" ? null : Number(e.target.value) })}
             placeholder="Min"
+            aria-label="Minimum age served"
             min={0}
           />
           <span style={{ color: "#6b7178", fontSize: 13 }}>to</span>
@@ -157,6 +158,7 @@ export function EditForm({
             value={draft.ageMax ?? ""}
             onChange={(e) => setDraft({ ...draft, ageMax: e.target.value === "" ? null : Number(e.target.value) })}
             placeholder="Max"
+            aria-label="Maximum age served"
             min={0}
           />
           <span style={{ color: "#6b7178", fontSize: 12.5 }}>Leave both blank if not age-restricted</span>
@@ -167,7 +169,7 @@ export function EditForm({
         <input id="field-exclusions" style={S.input} value={draft.exclusions || ""} onChange={set("exclusions")} placeholder="e.g. no active psychosis, no walk-ins, must be a Garfield County resident" />
       </FormRow>
 
-      <FormRow label="Insurance / cost" htmlFor="field-insurance">
+      <FormRow label="Cost and insurance" htmlFor="field-insurance">
         <input id="field-insurance" style={S.input} value={draft.insurance} onChange={set("insurance")} placeholder="e.g. Medicaid, sliding scale, free" />
       </FormRow>
 
@@ -250,7 +252,7 @@ export function EditForm({
                 onChange={(e) => setConnectSearch(e.target.value)}
               />
             )}
-            {others.length === 0 && <div style={{ fontSize: 13, color: "#9aa0a6", padding: 8 }}>Add other resources first.</div>}
+            {others.length === 0 && <div style={{ fontSize: 13, color: "#6b7178", padding: 8 }}>Add other resources first.</div>}
             {others.filter((r) => r.name.toLowerCase().includes(connectSearch.toLowerCase())).map((r) => {
               const on = draft.connections.includes(r.id);
               return (

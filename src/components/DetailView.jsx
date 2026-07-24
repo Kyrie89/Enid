@@ -233,7 +233,7 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
                 {l.phone && !isClient && (
                   <> · <a href={`tel:${l.phone.replace(/[^0-9+]/g, "")}`} style={{ color: "inherit" }}>{l.phone}</a></>
                 )}
-                {l.notes && <div style={{ color: "#9aa0a6", fontSize: 12.5 }}>{l.notes}</div>}
+                {l.notes && <div style={{ color: "#6b7178", fontSize: 12.5 }}>{l.notes}</div>}
               </div>
             );
           })}
@@ -279,7 +279,7 @@ export function DetailView({ resource, resources, onEdit, onDelete, onClose, onJ
 
       <div style={S.detailActions} className="no-print">
         {!isClient && canEdit && <button style={S.editBtn} onClick={onEdit}><Edit3 size={14} /> Edit</button>}
-        <button style={S.shareBtn} onClick={copyShare}><Copy size={14} /> Copy to text a client</button>
+        <button style={S.shareBtn} onClick={copyShare}><Copy size={14} /> {isClient ? "Copy to share" : "Copy to text a client"}</button>
         {!isClient && <button style={S.shareBtn} onClick={onPrint}><Printer size={14} /> Print this resource</button>}
         {!isClient && canEdit && resource.status !== "closed" && (
           <button style={S.closeBtn} onClick={() => setConfirmAction("close")}>

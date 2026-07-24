@@ -118,9 +118,9 @@ export function InsightsPanel({ onClose, resources }) {
         )}
 
         <div style={S.sectionLabel}>SEARCHES THAT FOUND NOTHING</div>
-        {loading && <div style={{ fontSize: 13, color: "#9aa0a6" }}>Loading…</div>}
+        {loading && <div style={{ fontSize: 13, color: "#6b7178" }}>Loading…</div>}
         {!loading && topMisses.length === 0 && (
-          <div style={{ fontSize: 13, color: "#9aa0a6", fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
+          <div style={{ fontSize: 13, color: "#6b7178", fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
             No empty searches logged yet — this fills in as people use the search box.
           </div>
         )}
@@ -129,12 +129,12 @@ export function InsightsPanel({ onClose, resources }) {
             {topMisses.map(({ term, hit_count }) => (
               <div key={term} style={S.missRow}>
                 <span style={{ fontWeight: 600 }}>{term}</span>
-                <span style={{ color: "#9aa0a6" }}>{hit_count}×</span>
+                <span style={{ color: "#6b7178" }}>{hit_count}×</span>
               </div>
             ))}
           </div>
         )}
-        <div style={{ fontSize: 11.5, color: "#c2c6cc", marginTop: 12, fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
+        <div style={{ fontSize: 11.5, color: "#6b7178", marginTop: 12, fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
           This is exactly the kind of thing to bring back to the coalition — repeated empty searches point at real gaps in coverage.
         </div>
       </div>

@@ -60,7 +60,7 @@ export function ConnectionRow({ resource, direction, onClick }) {
       <span style={{ ...S.connDot, background: meta.color }} />
       <span style={{ flex: 1, textAlign: "left" }}>
         <span style={{ fontWeight: 600, color: "#2f3437" }}>{resource.name}</span>
-        <span style={{ color: "#9aa0a6", marginLeft: 6, fontSize: 12 }}>{direction}</span>
+        <span style={{ color: "#6b7178", marginLeft: 6, fontSize: 12 }}>{direction}</span>
       </span>
     </button>
   );

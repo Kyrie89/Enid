@@ -33,8 +33,6 @@ export const ISSUE_TAG_GROUPS = [
   },
 ];
 
-export const ISSUE_TAGS = ISSUE_TAG_GROUPS.flatMap((g) => g.tags);
-
 export const BARRIER_TAGS = [
   "No insurance needed", "Medicaid accepted", "Sliding scale", "Free",
   "No ID required", "Criminal record OK", "Walk-ins welcome",

@@ -50,7 +50,15 @@ export function NetworkView({ resources, onSelect, selectedId }) {
           const isolated = !connectedIds.has(node.id);
           const isSelected = node.id === selectedId;
           return (
-            <g key={node.id} onClick={() => onSelect(node.id)} style={{ cursor: "pointer" }}>
+            <g
+              key={node.id}
+              onClick={() => onSelect(node.id)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(node.id); } }}
+              role="button"
+              tabIndex={0}
+              aria-label={`${node.name}${isolated ? " — no connections yet" : ""}`}
+              style={{ cursor: "pointer" }}
+            >
               <circle
                 cx={node.x}
                 cy={node.y}
