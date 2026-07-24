@@ -605,6 +605,7 @@ export default function App() {
           .split.has-detail .detailPane { max-height: none !important; }
           .utility-row { flex-wrap: wrap; row-gap: 10px; }
           .utility-row > div:last-child { margin-left: auto; }
+          .placeholder { height: auto !important; padding: 40px 20px !important; }
         }
         @media print {
           .app-root { min-height: 0 !important; }
@@ -1055,7 +1056,7 @@ export default function App() {
               onClearFilters={clearAllFilters}
             />
           ) : (
-            <div style={S.placeholder}>
+            <div className="placeholder" style={S.placeholder}>
               <Link2 size={28} color="#c2c6cc" />
               <div style={{ marginTop: 10, color: "#8a9099", fontSize: 14, textAlign: "center", maxWidth: 260 }}>
                 {audienceMode === "client"
