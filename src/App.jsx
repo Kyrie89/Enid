@@ -611,9 +611,10 @@ export default function App() {
         @keyframes spin { to { transform: rotate(360deg); } }
         @media (max-width: 720px) {
           .split { flex-direction: column !important; }
-          .listPane { width: 100% !important; max-width: 100% !important; border-right: none !important; max-height: 45vh !important; }
+          .listPane { width: 100% !important; max-width: 100% !important; border-right: none !important; max-height: none !important; overflow-y: visible !important; }
           .mobile-back { display: none; }
           .split.has-detail .listPane { display: none !important; }
+          .split:not(.has-detail) .detailPane { display: none !important; }
           .split.has-detail .mobile-back { display: flex !important; }
           .split.has-detail .detailPane { max-height: none !important; }
           .utility-row { flex-wrap: wrap; row-gap: 10px; }
