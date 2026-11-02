@@ -1,0 +1,602 @@
+[
+  {
+    "id": "8c7c87e9-b092-4af6-b35f-551f9efc2208",
+    "resource_id": "shepherds-cupboard",
+    "day": "Wednesday",
+    "time": "9:00–11:00am",
+    "label": "Food pantry",
+    "frequency": "1st & 2nd Wed of month"
+  },
+  {
+    "id": "5f7ded73-e162-48f2-b1f1-f8f649ce0be9",
+    "resource_id": "forgotten-ministries",
+    "day": "Saturday",
+    "time": "11:00am–1:00pm",
+    "label": "Free lunch & groceries",
+    "frequency": "1st Sat of month"
+  },
+  {
+    "id": "ce3f7d57-4992-435a-ab4c-02fbfec83d21",
+    "resource_id": "welcome-table-fcc",
+    "day": "Sunday",
+    "time": "Morning (confirm exact time)",
+    "label": "Free breakfast",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "41922670-8fe9-4198-93b2-747f65801b57",
+    "resource_id": "enid-welcome-table",
+    "day": "Sunday",
+    "time": "Evening, ~4:30–5:30pm (verify)",
+    "label": "Free dinner",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "7a0f6afb-21dd-4f5e-bc08-79ce42e80ab0",
+    "resource_id": "our-daily-bread",
+    "day": "Monday",
+    "time": "7:00am–12:00pm",
+    "label": "Free meals (breakfast 7–9am, lunch 10:30–12)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "abed4a83-f783-498b-82cb-63a6ac0960ee",
+    "resource_id": "our-daily-bread",
+    "day": "Tuesday",
+    "time": "7:00am–12:00pm",
+    "label": "Free meals (breakfast 7–9am, lunch 10:30–12)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "9a8cd6b8-5e4b-4b60-952e-0d52588f6424",
+    "resource_id": "our-daily-bread",
+    "day": "Wednesday",
+    "time": "7:00am–12:00pm",
+    "label": "Free meals (breakfast 7–9am, lunch 10:30–12)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "34db531f-5521-435e-b5a8-36f4eba3e71c",
+    "resource_id": "our-daily-bread",
+    "day": "Thursday",
+    "time": "7:00am–12:00pm",
+    "label": "Free meals (breakfast 7–9am, lunch 10:30–12)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "afd2c509-6b74-48b6-b69d-d6c328b31f5c",
+    "resource_id": "our-daily-bread",
+    "day": "Friday",
+    "time": "7:00am–12:00pm",
+    "label": "Free meals (breakfast 7–9am, lunch 10:30–12)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "1aea3a23-fe00-483f-8b3b-e92f46897036",
+    "resource_id": "loaves-and-fishes",
+    "day": "Monday",
+    "time": "1:00–4:00pm",
+    "label": "Food pantry",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "78c1a435-a9a5-4ac2-a8b5-582ba9bb2d24",
+    "resource_id": "loaves-and-fishes",
+    "day": "Tuesday",
+    "time": "2:30–5:30pm",
+    "label": "Food pantry",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "d995fa9f-3cb6-4f90-9c2c-81390bded46c",
+    "resource_id": "loaves-and-fishes",
+    "day": "Wednesday",
+    "time": "1:00–4:00pm",
+    "label": "Food pantry",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "8da260ed-5479-4077-b508-32027b197ebe",
+    "resource_id": "loaves-and-fishes",
+    "day": "Thursday",
+    "time": "9:00am–12:00pm",
+    "label": "Food pantry",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "24fc0bbb-29e2-45b4-8a65-87dbf372dd4a",
+    "resource_id": "enid-public-library",
+    "day": "Thursday",
+    "time": "4:30pm",
+    "label": "Teen Dungeons & Dragons (grades 6–12, drop-in)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "8d31554a-84ae-4922-8d1b-000e10a4b590",
+    "resource_id": "na-clubhouse-enid",
+    "day": "Sunday",
+    "time": "7:30pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "ade93516-d61f-453a-aa7b-5c43a5340e91",
+    "resource_id": "na-clubhouse-enid",
+    "day": "Monday",
+    "time": "7:30pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "cb9de5c0-8e95-4ffa-8c21-210d4dae273b",
+    "resource_id": "na-clubhouse-enid",
+    "day": "Tuesday",
+    "time": "7:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "37b59a57-ac6c-4926-8afe-47c62a0e46f4",
+    "resource_id": "na-clubhouse-enid",
+    "day": "Wednesday",
+    "time": "7:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "f837c454-60fb-4b1d-9d07-37ecd76845be",
+    "resource_id": "na-clubhouse-enid",
+    "day": "Thursday",
+    "time": "7:30pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "827ffebf-85a9-4d09-8556-22f2cfbf9b46",
+    "resource_id": "na-clubhouse-enid",
+    "day": "Friday",
+    "time": "6:30pm",
+    "label": "Women's Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "d1b3a53d-aae0-4808-93fc-d9bf0ca70c00",
+    "resource_id": "na-clubhouse-enid",
+    "day": "Friday",
+    "time": "10:00pm",
+    "label": "Candlelight Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "b2931260-2708-437c-84b4-23b5e9a421aa",
+    "resource_id": "na-clubhouse-enid",
+    "day": "Saturday",
+    "time": "10:00am",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "05d98821-9e42-4721-9919-bc05a75112f1",
+    "resource_id": "na-clubhouse-enid",
+    "day": "Saturday",
+    "time": "7:30pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "5a5a13cd-f736-4ce4-abe1-cbb4da8c5d81",
+    "resource_id": "na-clubhouse-enid",
+    "day": "Monday",
+    "time": "12:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "c877c332-3143-4ce8-ab4e-0f5652414b95",
+    "resource_id": "na-clubhouse-enid",
+    "day": "Thursday",
+    "time": "12:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "f36d3bba-8368-484b-bc12-24c157040676",
+    "resource_id": "tyler-house-group",
+    "day": "Monday",
+    "time": "12:00–1:00pm",
+    "label": "Meeting (Closed)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "73f84f87-5477-4427-8a09-6e630a69d306",
+    "resource_id": "tyler-house-group",
+    "day": "Monday",
+    "time": "8:00–9:00pm",
+    "label": "Meeting (Open)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "c56f154a-5f47-46b5-a684-4ddb8726e342",
+    "resource_id": "tyler-house-group",
+    "day": "Tuesday",
+    "time": "12:00–1:00pm",
+    "label": "Meeting (Closed)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "31195daa-9648-4014-8012-152f152ac3b9",
+    "resource_id": "tyler-house-group",
+    "day": "Tuesday",
+    "time": "8:00–9:00pm",
+    "label": "Meeting (Open)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "ddf4b610-e237-40b1-bacb-c38429399165",
+    "resource_id": "tyler-house-group",
+    "day": "Wednesday",
+    "time": "12:00–1:00pm",
+    "label": "Meeting (Closed)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "662ee884-4024-4462-9cb0-22fce6dfde96",
+    "resource_id": "tyler-house-group",
+    "day": "Wednesday",
+    "time": "6:30–7:30pm",
+    "label": "Women's Meeting (Closed)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "f641749b-d9b5-4227-a28c-b00206b8c21f",
+    "resource_id": "tyler-house-group",
+    "day": "Wednesday",
+    "time": "8:00–9:00pm",
+    "label": "Meeting (Open)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "31598c65-fa20-4a9f-b9c5-bb3e697becb7",
+    "resource_id": "tyler-house-group",
+    "day": "Thursday",
+    "time": "12:00–1:00pm",
+    "label": "Meeting (Closed)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "766b1cb1-df3b-472f-b405-1b217b22a3ae",
+    "resource_id": "tyler-house-group",
+    "day": "Thursday",
+    "time": "8:00–9:00pm",
+    "label": "Meeting (Open)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "3883d64b-7466-4875-bf34-c1748f3dc343",
+    "resource_id": "tyler-house-group",
+    "day": "Friday",
+    "time": "12:00–1:00pm",
+    "label": "Meeting (Closed)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "ca022c5d-d4e9-4596-9854-f6cb2315fde7",
+    "resource_id": "tyler-house-group",
+    "day": "Friday",
+    "time": "8:00–9:00pm",
+    "label": "Meeting (Open)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "b5c1fd92-b327-412a-9a8c-e40050fca12a",
+    "resource_id": "tyler-house-group",
+    "day": "Saturday",
+    "time": "12:00–1:00pm",
+    "label": "Meeting (Closed)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "c7ac1622-a478-4252-b237-b426bc02ef74",
+    "resource_id": "tyler-house-group",
+    "day": "Saturday",
+    "time": "8:00–9:00pm",
+    "label": "Meeting (Open)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "a418e598-c600-47c0-b57c-e7594cc0ce70",
+    "resource_id": "tyler-house-group",
+    "day": "Sunday",
+    "time": "12:00–1:00pm",
+    "label": "Meeting (Closed)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "a6b5545c-a033-46f8-a3aa-0f0bcdfae5cc",
+    "resource_id": "tyler-house-group",
+    "day": "Sunday",
+    "time": "8:00–9:00pm",
+    "label": "Meeting (Open)",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "df2cdc5b-9496-46ce-bcf9-530c3d3cd4c5",
+    "resource_id": "maine-street-aa",
+    "day": "Monday",
+    "time": "12:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "8ba002e2-54f7-40ed-be55-f3702b88eb0f",
+    "resource_id": "maine-street-aa",
+    "day": "Sunday",
+    "time": "12:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "2c30d30a-4ada-4b14-ab87-1d2296d37ebd",
+    "resource_id": "maine-street-aa",
+    "day": "Tuesday",
+    "time": "12:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "4b162673-6f65-4db4-ad69-1c8832c4ec9a",
+    "resource_id": "maine-street-aa",
+    "day": "Wednesday",
+    "time": "12:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "4c103f83-70ef-4112-bc1b-a0e72495be06",
+    "resource_id": "maine-street-aa",
+    "day": "Thursday",
+    "time": "12:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "69fc69ed-488d-4f37-ba71-37010db950f8",
+    "resource_id": "maine-street-aa",
+    "day": "Friday",
+    "time": "12:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "bce19db7-f05d-4d39-b74f-69de8bf688ce",
+    "resource_id": "maine-street-aa",
+    "day": "Saturday",
+    "time": "12:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "34802719-627d-4412-9a4c-253b82ddd178",
+    "resource_id": "maine-street-aa",
+    "day": "Monday",
+    "time": "7:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "fc4707af-bdbd-484c-9eed-e79abd7d16b7",
+    "resource_id": "maine-street-aa",
+    "day": "Sunday",
+    "time": "7:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "39079846-e895-47d1-b9a9-4de00610d4bd",
+    "resource_id": "maine-street-aa",
+    "day": "Tuesday",
+    "time": "7:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "125dbe69-0cd5-4e1f-b53a-af65d1c3b738",
+    "resource_id": "maine-street-aa",
+    "day": "Wednesday",
+    "time": "7:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "063df01e-0c60-451e-b8e0-da54a3ce727d",
+    "resource_id": "maine-street-aa",
+    "day": "Thursday",
+    "time": "7:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "fea8ab5b-2f1f-4aee-bb76-7c04c4f82a0b",
+    "resource_id": "maine-street-aa",
+    "day": "Friday",
+    "time": "7:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "fa4dd0aa-7cd0-4433-99c7-41591ca76ea6",
+    "resource_id": "maine-street-aa",
+    "day": "Saturday",
+    "time": "7:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "af92f46e-d3f5-41b1-9409-ef1de24ab3d4",
+    "resource_id": "maine-street-aa",
+    "day": "Saturday",
+    "time": "8:00am",
+    "label": "Men's Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "87d5e8f9-b5a7-49d9-b128-a0bca4e98bec",
+    "resource_id": "maine-street-aa",
+    "day": "Saturday",
+    "time": "10:00am",
+    "label": "Women's Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "00fab3b1-7669-4dc9-b5c2-e62605dc161a",
+    "resource_id": "yfs-enid",
+    "day": "Monday",
+    "time": "8:00am - 5:00pm",
+    "label": "Office Open",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "a6eada37-a8e6-4d22-9f37-7ecbf7e07f4d",
+    "resource_id": "yfs-enid",
+    "day": "Tuesday",
+    "time": "8:00am - 5:00pm",
+    "label": "Office Open",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "ac076fc5-cb18-46da-b10d-75fe9325d505",
+    "resource_id": "yfs-enid",
+    "day": "Wednesday",
+    "time": "8:00am - 5:00pm",
+    "label": "Office Open",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "f543abb9-f243-49d3-8c9e-e8b06105b6a2",
+    "resource_id": "yfs-enid",
+    "day": "Thursday",
+    "time": "8:00am - 5:00pm",
+    "label": "Office Open",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "b8492e08-a259-4612-b9fe-4a0fb481256b",
+    "resource_id": "yfs-enid",
+    "day": "Friday",
+    "time": "8:00am - 4:00pm",
+    "label": "Office Open",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "aa333020-766e-4f95-b045-c71d3285968d",
+    "resource_id": "r_ljb5yi5s",
+    "day": "Monday",
+    "time": "12:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "35159eff-6ebc-4f56-ad79-afbabe198724",
+    "resource_id": "r_ljb5yi5s",
+    "day": "Sunday",
+    "time": "12:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "ae1011f7-6b83-40a3-b73c-dee5eaa35807",
+    "resource_id": "r_ljb5yi5s",
+    "day": "Tuesday",
+    "time": "12:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "b5691bfa-6c07-47eb-ada4-06de6672c2c0",
+    "resource_id": "r_ljb5yi5s",
+    "day": "Wednesday",
+    "time": "12:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "7f772e8b-ae3b-4090-aa2d-485edbd88b8f",
+    "resource_id": "r_ljb5yi5s",
+    "day": "Thursday",
+    "time": "12:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "cf75b531-c0a0-495c-8bb6-68e5ed20ba5e",
+    "resource_id": "r_ljb5yi5s",
+    "day": "Friday",
+    "time": "12:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "83ae966a-3a15-4603-acd6-4b11a8fadc57",
+    "resource_id": "r_ljb5yi5s",
+    "day": "Saturday",
+    "time": "12:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "f1fcd392-d0b7-4549-b3d2-ed890e95aaec",
+    "resource_id": "r_ljb5yi5s",
+    "day": "Monday",
+    "time": "6:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "62b63012-ce40-404c-9066-4b3ac9f01b11",
+    "resource_id": "r_ljb5yi5s",
+    "day": "Sunday",
+    "time": "6:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "e07451f9-f42c-41ac-ba9b-8792ce36ffd9",
+    "resource_id": "r_ljb5yi5s",
+    "day": "Tuesday",
+    "time": "6:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "6a597914-4cb7-4c26-9de8-86bab7973c71",
+    "resource_id": "r_ljb5yi5s",
+    "day": "Wednesday",
+    "time": "6:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "be74833f-d843-4479-8976-b6cd2e7aa4ca",
+    "resource_id": "r_ljb5yi5s",
+    "day": "Thursday",
+    "time": "6:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "4f526aea-a81c-4fe8-a6e9-4c2a6825bb2b",
+    "resource_id": "r_ljb5yi5s",
+    "day": "Friday",
+    "time": "6:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  },
+  {
+    "id": "f251841b-cb8f-4b82-b3bc-5d03ba1f3627",
+    "resource_id": "r_ljb5yi5s",
+    "day": "Saturday",
+    "time": "6:00pm",
+    "label": "Open Meeting",
+    "frequency": "Weekly"
+  }
+]
