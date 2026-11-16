@@ -1,0 +1,98 @@
+[
+  {
+    "id": "08df61b2-b044-4385-b3c0-809b7480a106",
+    "resource_id": "wheatheart-nutrition-enid",
+    "label": "Garber",
+    "address": "602 Main St, Garber, OK",
+    "phone": "580-233-8114",
+    "notes": "Mon-Thu 11:30am-12:30pm lunch"
+  },
+  {
+    "id": "fc3cf5c4-bfec-43eb-8ee6-c485d130fd80",
+    "resource_id": "wheatheart-nutrition-enid",
+    "label": "Ringwood",
+    "address": "125 E Melrose St, Ringwood, OK",
+    "phone": "580-233-8114",
+    "notes": "Mon-Thu 11:30am-12:30pm lunch"
+  },
+  {
+    "id": "8b3660d3-14e6-4f68-baff-c2bdc471d4eb",
+    "resource_id": "great-salt-plains-health-east",
+    "label": "Central",
+    "address": "1106 E Broadway Ave, Enid, OK",
+    "phone": "580-233-5300",
+    "notes": "Medical, women's services"
+  },
+  {
+    "id": "33c90055-f1c9-4fe9-8245-134b8d6f5bb9",
+    "resource_id": "great-salt-plains-health-east",
+    "label": "West",
+    "address": "5320 W Chestnut Ave, Enid, OK",
+    "phone": "580-701-0100",
+    "notes": "Medical"
+  },
+  {
+    "id": "ed90542e-20c3-4919-a239-e664ec7de1fa",
+    "resource_id": "great-salt-plains-health-east",
+    "label": "Canton",
+    "address": "310 E Walnut St, Canton, OK",
+    "phone": "580-886-2200",
+    "notes": ""
+  },
+  {
+    "id": "1b17b4fe-f8d5-47f5-8d32-7969c7177314",
+    "resource_id": "great-salt-plains-health-east",
+    "label": "Cherokee",
+    "address": "405 S Oklahoma Ave, Cherokee, OK",
+    "phone": "580-596-2800",
+    "notes": ""
+  },
+  {
+    "id": "9cab38a0-516a-410c-841c-f1714a5239e6",
+    "resource_id": "great-salt-plains-health-east",
+    "label": "Medford",
+    "address": "619 N Front St, Medford, OK",
+    "phone": "580-395-3200",
+    "notes": ""
+  },
+  {
+    "id": "48aacf76-a391-4900-b82b-4a6320da5449",
+    "resource_id": "wheatheart-nutrition-enid",
+    "label": "Watonga",
+    "address": "212 N Spiece Ave, Watonga, OK",
+    "phone": "580-233-8114",
+    "notes": "Mon-Thu 11:30am-12:30pm lunch"
+  },
+  {
+    "id": "16e420bc-8753-4a69-9a74-0e62bce5d03a",
+    "resource_id": "wheatheart-nutrition-enid",
+    "label": "Kingfisher",
+    "address": "1605 S Main St, Kingfisher, OK",
+    "phone": "580-233-8114",
+    "notes": "Mon-Thu 11:30am-12:30pm lunch"
+  },
+  {
+    "id": "94d99c46-9c8c-4bba-b274-30942c4e8fd6",
+    "resource_id": "wheatheart-nutrition-enid",
+    "label": "Pond Creek",
+    "address": "104 S 1st St, Pond Creek, OK",
+    "phone": "580-233-8114",
+    "notes": "Mon-Thu 11:30am-12:30pm lunch"
+  },
+  {
+    "id": "0f675c16-688f-442c-894e-7784949b30c2",
+    "resource_id": "legal-aid-ok-enid",
+    "label": "Stillwater",
+    "address": "224 S Muskogee Ave, Stillwater, OK",
+    "phone": "405-624-1734",
+    "notes": ""
+  },
+  {
+    "id": "d2609e9c-c5d0-475d-a5af-a9f4a4113226",
+    "resource_id": "legal-aid-ok-enid",
+    "label": "Woodward",
+    "address": "1115 18th St, Woodward, OK",
+    "phone": "580-256-4903",
+    "notes": ""
+  }
+]
